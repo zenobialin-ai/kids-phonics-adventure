@@ -41,9 +41,31 @@
       overflow-x: hidden;
     }
 
+    /* 頂部啟動音效提示條 (若瀏覽器尚未授權點擊) */
+    #soundBanner {
+      background: #FEF3C7;
+      color: #92400E;
+      padding: 10px 16px;
+      text-align: center;
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: all 0.3s;
+    }
+
+    #soundBanner.ready {
+      background: #DCFCE7;
+      color: #166534;
+    }
+
     /* 頂部導航與星星看板 */
     header {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(8px);
       padding: 12px 24px;
       display: flex;
@@ -200,15 +222,16 @@
     }
 
     .target-image-display {
-      font-size: 6rem;
+      font-size: 6.5rem;
       margin: 10px 0;
       filter: drop-shadow(0 8px 16px rgba(0,0,0,0.1));
       transition: transform 0.3s;
       cursor: pointer;
+      display: inline-block;
     }
 
     .target-image-display:hover {
-      transform: scale(1.1) rotate(5deg);
+      transform: scale(1.15) rotate(6deg);
     }
 
     .phonics-hint {
@@ -218,27 +241,34 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 12px;
     }
 
     .sound-btn {
       background: #FEE2E2;
       color: #EF4444;
       border: none;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
+      padding: 10px 18px;
+      border-radius: 50px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
+      gap: 8px;
+      font-size: 1.15rem;
+      font-weight: 700;
       transition: all 0.2s;
+      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
     }
 
     .sound-btn:hover {
-      transform: scale(1.15);
+      transform: scale(1.08);
       background: #FECACA;
+    }
+
+    .sound-btn.speaking {
+      animation: pulseGlow 1s infinite alternate;
+      background: #F87171;
+      color: white;
     }
 
     /* 拼字格子槽 */
@@ -250,18 +280,19 @@
     }
 
     .slot {
-      width: 76px;
-      height: 84px;
+      width: 80px;
+      height: 88px;
       border: 4px dashed #CBD5E1;
       border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.8rem;
+      font-size: 3rem;
       font-weight: 900;
       color: #1E293B;
       background: #F8FAFC;
       transition: all 0.3s;
+      cursor: pointer;
     }
 
     .slot.filled {
@@ -281,13 +312,13 @@
     }
 
     .letter-tile {
-      width: 68px;
-      height: 74px;
+      width: 70px;
+      height: 76px;
       background: linear-gradient(180deg, #FFFFFF 0%, #F1F5F9 100%);
       border: 3px solid #E2E8F0;
       border-bottom: 7px solid #CBD5E1;
       border-radius: 18px;
-      font-size: 2.2rem;
+      font-size: 2.3rem;
       font-weight: 800;
       color: #334155;
       cursor: pointer;
@@ -319,7 +350,7 @@
       display: flex;
       justify-content: center;
       gap: 16px;
-      margin-top: 28px;
+      margin-top: 32px;
     }
 
     .btn {
@@ -370,14 +401,14 @@
       border: 3px solid #E2E8F0;
       border-radius: 20px;
       padding: 16px 24px;
-      font-size: 2.5rem;
+      font-size: 2.6rem;
       font-weight: 800;
       color: var(--purple);
       cursor: pointer;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-width: 100px;
+      min-width: 105px;
       transition: all 0.2s;
     }
 
@@ -388,14 +419,14 @@
     }
 
     .chunk-tag {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       color: #94A3B8;
       font-weight: 600;
       margin-top: 4px;
     }
 
     .blend-symbol {
-      font-size: 2rem;
+      font-size: 2.2rem;
       color: #CBD5E1;
       font-weight: 900;
     }
@@ -403,8 +434,8 @@
     .blend-result-box {
       background: linear-gradient(135deg, #FEF08A 0%, #FDE047 100%);
       border-radius: 24px;
-      padding: 16px 36px;
-      font-size: 3rem;
+      padding: 18px 40px;
+      font-size: 3.2rem;
       font-weight: 900;
       color: #713F12;
       box-shadow: 0 8px 24px rgba(253, 224, 71, 0.4);
@@ -415,12 +446,12 @@
       animation: pulseGlow 2s infinite ease-in-out;
     }
 
-    /* 魔法鍋家族切換 */
     .family-tags {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       flex-wrap: wrap;
       justify-content: center;
+      margin-bottom: 12px;
     }
 
     /* =========================================
@@ -434,9 +465,9 @@
     }
 
     .character-avatar {
-      font-size: 5rem;
-      width: 120px;
-      height: 120px;
+      font-size: 5.5rem;
+      width: 130px;
+      height: 130px;
       background: #E0F2FE;
       border-radius: 50%;
       display: flex;
@@ -454,7 +485,7 @@
       border-radius: 28px;
       padding: 24px 32px;
       position: relative;
-      max-width: 600px;
+      max-width: 620px;
       width: 100%;
       text-align: left;
       box-shadow: var(--shadow);
@@ -483,7 +514,7 @@
     }
 
     .dialogue-en {
-      font-size: 1.6rem;
+      font-size: 1.65rem;
       font-weight: 800;
       color: #0F172A;
       display: flex;
@@ -494,7 +525,7 @@
     }
 
     .dialogue-zh {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       color: #64748B;
       margin-top: 8px;
     }
@@ -512,7 +543,7 @@
       background: white;
       border: 3px solid #E2E8F0;
       border-radius: 20px;
-      padding: 16px 20px;
+      padding: 18px 20px;
       font-size: 1.2rem;
       font-weight: 700;
       color: #1E293B;
@@ -607,18 +638,23 @@
       100% { transform: rotate(0deg) scale(1); }
     }
 
-    /* 響應式微調 */
     @media (max-width: 600px) {
       .brand-title { font-size: 1.1rem; }
       .tab-btn { font-size: 0.95rem; padding: 10px 8px; }
-      .slot { width: 60px; height: 70px; font-size: 2.2rem; }
-      .letter-tile { width: 54px; height: 60px; font-size: 1.8rem; }
-      .target-image-display { font-size: 4.8rem; }
+      .slot { width: 64px; height: 72px; font-size: 2.4rem; }
+      .letter-tile { width: 56px; height: 62px; font-size: 1.9rem; }
+      .target-image-display { font-size: 5rem; }
       .dialogue-en { font-size: 1.3rem; }
     }
   </style>
 </head>
 <body>
+
+  <!-- 點擊解鎖音效提示橫條 -->
+  <div id="soundBanner" onclick="unlockAudioSystem()">
+    <span>🔊</span>
+    <span id="soundBannerText">點擊這裡或畫面任意處，開啟發音與歡樂音效！</span>
+  </div>
 
   <!-- 頂部資訊列 -->
   <header>
@@ -660,30 +696,29 @@
     <section id="panel-builder" class="panel active">
       <div class="game-card">
         <!-- 類別切換 -->
-        <div class="level-select" id="familyChips">
-          <!-- 動態生成或預設 -->
-        </div>
+        <div class="level-select" id="familyChips"></div>
 
         <!-- 挑戰目標圖案 -->
-        <div class="target-image-display" id="targetEmoji" onclick="playTargetWordSound()" title="點我聽單字發音">
+        <div class="target-image-display" id="targetEmoji" onclick="playTargetWordSound()" title="點我聽發音">
           🐱
         </div>
 
         <div class="phonics-hint">
-          <span>點擊聽發音：</span>
-          <button class="sound-btn" onclick="playTargetWordSound()" title="朗讀整詞">🔊</button>
-          <button class="sound-btn" style="background:#E0F2FE; color:#0284C7;" onclick="spellOutPhonics()" title="拆解自然發音">🧩</button>
+          <button class="sound-btn" id="btnWordSound" onclick="playTargetWordSound()" title="朗讀整詞">
+            <span>🔊</span>
+            <span id="targetWordTextHint">聽單字發音</span>
+          </button>
+          <button class="sound-btn" style="background:#E0F2FE; color:#0284C7;" onclick="spellOutPhonics()" title="拆解自然發音">
+            <span>🧩</span>
+            <span>發音拆解教學</span>
+          </button>
         </div>
 
         <!-- 拼字卡槽 -->
-        <div class="spell-slots" id="slotsContainer">
-          <!-- 動態卡槽 -->
-        </div>
+        <div class="spell-slots" id="slotsContainer"></div>
 
         <!-- 字母積木選擇區 -->
-        <div class="letter-blocks" id="letterPool">
-          <!-- 動態字母按鈕 -->
-        </div>
+        <div class="letter-blocks" id="letterPool"></div>
 
         <!-- 功能列 -->
         <div class="action-row">
@@ -700,9 +735,7 @@
         <p style="color: #64748B; margin-bottom: 20px;">點擊音素積木聽發音，再點金色魔法鍋將聲音「黏」在一起！</p>
 
         <!-- 韻尾家族選擇 -->
-        <div class="family-tags" id="blenderFamilyTags">
-          <!-- 家族選項 -->
-        </div>
+        <div class="family-tags" id="blenderFamilyTags"></div>
 
         <div class="blender-container">
           <div class="blender-stage">
@@ -752,7 +785,7 @@
           <div class="speech-bubble">
             <div class="dialogue-en">
               <span id="tobySpeechEn">"Hello! What's your name?"</span>
-              <button class="sound-btn" onclick="playTobyVoice()" title="重播 Toby 發音">🔊</button>
+              <button class="sound-btn" style="padding: 6px 14px;" onclick="playTobyVoice()" title="重播 Toby 發音">🔊</button>
             </div>
             <div class="dialogue-zh" id="tobySpeechZh">「嗨！你叫什麼名字呢？」</div>
           </div>
@@ -762,9 +795,7 @@
           </p>
 
           <!-- 互動選項卡 -->
-          <div class="options-grid" id="talkOptionsGrid">
-            <!-- 對話選項按鈕 -->
-          </div>
+          <div class="options-grid" id="talkOptionsGrid"></div>
         </div>
       </div>
     </section>
@@ -783,100 +814,216 @@
 
   <script>
     /* =========================================================
-       1. 音效引擎 (Web Audio API - 無需外部素材，離線可用)
+       1. 萬用音訊引擎與語音雙核心 (Hybrid Audio & Speech)
        ========================================================= */
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let audioCtx = null;
+    let audioUnlocked = false;
+    let preferredVoice = null;
 
-    function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
-      if (audioCtx.state === 'suspended') {
+    // 取得或初始化 AudioContext
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioClass) {
+          audioCtx = new AudioClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
         audioCtx.resume();
       }
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-      gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + duration);
+      return audioCtx;
+    }
+
+    // 全域解鎖器：符合瀏覽器 Autoplay 安全策略
+    function unlockAudioSystem() {
+      const ctx = getAudioContext();
+      if (ctx && ctx.state === 'suspended') {
+        ctx.resume();
+      }
+
+      // 載入語音清單
+      initVoices();
+
+      audioUnlocked = true;
+      const banner = document.getElementById('soundBanner');
+      const bannerText = document.getElementById('soundBannerText');
+      if (banner && bannerText) {
+        banner.classList.add('ready');
+        bannerText.innerHTML = '🎉 發音與音效系統已就緒！盡情探索吧！';
+        setTimeout(() => {
+          banner.style.display = 'none';
+        }, 1500);
+      }
+
+      // 播放輕快確認音
+      playTone(587.33, 'sine', 0.15, 0.25);
+    }
+
+    // 點擊頁面任何地方皆自動解鎖
+    window.addEventListener('pointerdown', () => {
+      if (!audioUnlocked) unlockAudioSystem();
+    }, { once: true });
+
+    // Web Speech API Voice 挑選
+    function initVoices() {
+      if (!('speechSynthesis' in window)) return;
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        // 優先找美式英文兒童/真人語音
+        preferredVoice = voices.find(v => v.lang === 'en-US' && (v.name.includes('Natural') || v.name.includes('Samantha') || v.name.includes('Zira') || v.name.includes('Google')))
+          || voices.find(v => v.lang.startsWith('en'))
+          || voices[0];
+      }
+    }
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = initVoices;
+    }
+
+    // 播放合成卡通樂音 (Web Audio API)
+    function playTone(freq, type = 'sine', duration = 0.18, gainVal = 0.2) {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(gainVal, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch (e) {
+        console.warn('Audio tone error:', e);
+      }
     }
 
     function soundLetterClick() {
-      playTone(480, 'triangle', 0.08, 0.15);
+      playTone(520, 'triangle', 0.1, 0.25);
     }
 
     function soundSuccess() {
-      // 歡樂三連和弦
-      setTimeout(() => playTone(523.25, 'sine', 0.12, 0.15), 0);
-      setTimeout(() => playTone(659.25, 'sine', 0.12, 0.15), 100);
-      setTimeout(() => playTone(783.99, 'sine', 0.25, 0.2), 200);
-      setTimeout(() => playTone(1046.50, 'sine', 0.35, 0.2), 300);
+      setTimeout(() => playTone(523.25, 'sine', 0.12, 0.3), 0);
+      setTimeout(() => playTone(659.25, 'sine', 0.12, 0.3), 100);
+      setTimeout(() => playTone(783.99, 'sine', 0.2, 0.3), 200);
+      setTimeout(() => playTone(1046.50, 'sine', 0.35, 0.35), 320);
     }
 
     function soundCheer() {
       const freqs = [440, 554, 659, 880];
       freqs.forEach((f, i) => {
-        setTimeout(() => playTone(f, 'triangle', 0.18, 0.12), i * 80);
+        setTimeout(() => playTone(f, 'triangle', 0.18, 0.2), i * 90);
       });
     }
 
     function soundWrong() {
-      playTone(220, 'sawtooth', 0.2, 0.1);
+      playTone(200, 'sawtooth', 0.22, 0.2);
     }
 
     /* =========================================================
-       2. 語音朗讀合成 (SpeechSynthesis)
+       雙軌語音播放：Web Speech + 線上音訊 Fallback (確保100%有聲)
        ========================================================= */
-    function speakText(text, rate = 0.85, pitch = 1.1) {
-      if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.rate = rate;
-      utterance.pitch = pitch;
-      window.speechSynthesis.speak(utterance);
+    let currentAudioElem = null;
+
+    function playAudioFallback(text, onEnded) {
+      try {
+        if (currentAudioElem) {
+          currentAudioElem.pause();
+          currentAudioElem = null;
+        }
+        // 使用公開純音訊字典發音 CDN (支援單字及短句)
+        const cleanText = text.replace(/[^a-zA-Z\s]/g, '').trim();
+        const audioUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanText)}&type=2`;
+        currentAudioElem = new Audio(audioUrl);
+        currentAudioElem.onended = () => { if (onEnded) onEnded(); };
+        currentAudioElem.onerror = () => { if (onEnded) onEnded(); };
+        currentAudioElem.play().catch(e => {
+          console.warn('Fallback audio failed to play:', e);
+          if (onEnded) onEnded();
+        });
+      } catch (e) {
+        if (onEnded) onEnded();
+      }
+    }
+
+    function speakText(text, rate = 0.85, pitch = 1.1, callback = null) {
+      if (!audioUnlocked) unlockAudioSystem();
+
+      // 檢查 Web Speech API 是否就緒且可用
+      if ('speechSynthesis' in window) {
+        try {
+          window.speechSynthesis.cancel(); // 清空隊列
+          
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = 'en-US';
+          utterance.rate = rate;
+          utterance.pitch = pitch;
+          if (preferredVoice) utterance.voice = preferredVoice;
+
+          let spoken = false;
+          utterance.onstart = () => { spoken = true; };
+          utterance.onend = () => { if (callback) callback(); };
+          utterance.onerror = (e) => {
+            console.warn('SpeechSynthesis error, switching to audio fallback:', e);
+            playAudioFallback(text, callback);
+          };
+
+          window.speechSynthesis.speak(utterance);
+
+          // 防止 file:// 下 speechSynthesis 卡住未出聲的容錯計時器
+          setTimeout(() => {
+            if (!spoken && window.speechSynthesis.speaking === false) {
+              playAudioFallback(text, callback);
+            }
+          }, 350);
+          return;
+        } catch (err) {
+          console.warn('SpeechSynthesis exception:', err);
+        }
+      }
+
+      // 若不支援 SpeechSynthesis 則直接走 Fallback
+      playAudioFallback(text, callback);
     }
 
     /* =========================================================
-       3. 題庫與自然發音資料庫
+       2. 題庫與自然發音資料庫
        ========================================================= */
     const PHONICS_DATA = [
       {
         category: 'Short a',
         words: [
-          { word: 'cat', emoji: '🐱', phonics: ['c', 'a', 't'], sounds: ['k', 'æ', 't'], hint: '喵喵叫的小貓咪' },
-          { word: 'bat', emoji: '🦇', phonics: ['b', 'a', 't'], sounds: ['b', 'æ', 't'], hint: '夜晚飛行的蝙蝠' },
-          { word: 'hat', emoji: '👒', phonics: ['h', 'a', 't'], sounds: ['h', 'æ', 't'], hint: '太陽大戴的帽子' },
-          { word: 'bag', emoji: '🎒', phonics: ['b', 'a', 'g'], sounds: ['b', 'æ', 'g'], hint: '上學背的書包' }
+          { word: 'cat', emoji: '🐱', phonics: ['c', 'a', 't'], hint: '喵喵叫的小貓咪' },
+          { word: 'bat', emoji: '🦇', phonics: ['b', 'a', 't'], hint: '夜晚飛行的蝙蝠' },
+          { word: 'hat', emoji: '👒', phonics: ['h', 'a', 't'], hint: '太陽大戴的帽子' },
+          { word: 'bag', emoji: '🎒', phonics: ['b', 'a', 'g'], hint: '上學背的書包' }
         ]
       },
       {
         category: 'Short e & i',
         words: [
-          { word: 'pen', emoji: '🖊️', phonics: ['p', 'e', 'n'], sounds: ['p', 'e', 'n'], hint: '寫作業用的原子筆' },
-          { word: 'bed', emoji: '🛏️', phonics: ['b', 'e', 'd'], sounds: ['b', 'e', 'd'], hint: '睡覺的舒服大床' },
-          { word: 'pig', emoji: '🐷', phonics: ['p', 'i', 'g'], sounds: ['p', 'ɪ', 'g'], hint: '粉紅色的小豬' },
-          { word: 'sun', emoji: '☀️', phonics: ['s', 'u', 'n'], sounds: ['s', 'ʌ', 'n'], hint: '天空中的溫暖太陽' }
+          { word: 'pen', emoji: '🖊️', phonics: ['p', 'e', 'n'], hint: '寫作業用的原子筆' },
+          { word: 'bed', emoji: '🛏️', phonics: ['b', 'e', 'd'], hint: '睡覺的舒服大床' },
+          { word: 'pig', emoji: '🐷', phonics: ['p', 'i', 'g'], hint: '粉紅色的小豬' },
+          { word: 'sun', emoji: '☀️', phonics: ['s', 'u', 'n'], hint: '天空中的溫暖太陽' }
         ]
       },
       {
         category: 'Short o & u',
         words: [
-          { word: 'dog', emoji: '🐶', phonics: ['d', 'o', 'g'], sounds: ['d', 'ɒ', 'g'], hint: '汪汪叫的忠誠狗狗' },
-          { word: 'fox', emoji: '🦊', phonics: ['f', 'o', 'x'], sounds: ['f', 'ɒ', 'ks'], hint: '機靈可愛的小狐狸' },
-          { word: 'bus', emoji: '🚌', phonics: ['b', 'u', 's'], sounds: ['b', 'ʌ', 's'], hint: '出門搭乘的大公車' },
-          { word: 'cup', emoji: '🥤', phonics: ['c', 'u', 'p'], sounds: ['k', 'ʌ', 'p'], hint: '喝水用的小杯子' }
+          { word: 'dog', emoji: '🐶', phonics: ['d', 'o', 'g'], hint: '汪汪叫的忠誠狗狗' },
+          { word: 'fox', emoji: '🦊', phonics: ['f', 'o', 'x'], hint: '機靈可愛的小狐狸' },
+          { word: 'bus', emoji: '🚌', phonics: ['b', 'u', 's'], hint: '出門搭乘的大公車' },
+          { word: 'cup', emoji: '🥤', phonics: ['c', 'u', 'p'], hint: '喝水用的小杯子' }
         ]
       }
     ];
 
-    // 發音魔法鍋資料
     const BLENDER_FAMILIES = {
       '-at': {
         rime: 'at',
-        rimeSound: 'at',
         items: [
           { onset: 'c', word: 'cat', emoji: '🐱' },
           { onset: 'b', word: 'bat', emoji: '🦇' },
@@ -887,7 +1034,6 @@
       },
       '-og': {
         rime: 'og',
-        rimeSound: 'og',
         items: [
           { onset: 'd', word: 'dog', emoji: '🐶' },
           { onset: 'f', word: 'fog', emoji: '🌫️' },
@@ -897,7 +1043,6 @@
       },
       '-ig': {
         rime: 'ig',
-        rimeSound: 'ig',
         items: [
           { onset: 'p', word: 'pig', emoji: '🐷' },
           { onset: 'b', word: 'big', emoji: '🐘' },
@@ -907,7 +1052,6 @@
       },
       '-un': {
         rime: 'un',
-        rimeSound: 'un',
         items: [
           { onset: 's', word: 'sun', emoji: '☀️' },
           { onset: 'r', word: 'run', emoji: '🏃‍♂️' },
@@ -917,7 +1061,6 @@
       }
     };
 
-    // 互動對話情境資料庫
     const CONVERSATION_SCENARIOS = [
       {
         tobyEn: "Hello! What is your name? 👋",
@@ -1006,7 +1149,7 @@
     ];
 
     /* =========================================================
-       4. 全域狀態管理
+       3. 狀態與流程控制
        ========================================================= */
     let stars = 0;
     let currentCategoryIdx = 0;
@@ -1014,18 +1157,12 @@
     let currentSpellingSlots = [];
     let currentWordObj = null;
 
-    // 發音鍋當前選擇
     let currentBlenderFamilyKey = '-at';
     let currentBlenderItem = null;
 
-    // 當前對話索引
     let currentTalkIdx = 0;
 
-    /* =========================================================
-       5. 頁面初始化
-       ========================================================= */
     window.addEventListener('DOMContentLoaded', () => {
-      // 讀取本地累積星星
       const savedStars = localStorage.getItem('phonics_adventure_stars');
       if (savedStars) {
         stars = parseInt(savedStars, 10) || 0;
@@ -1036,7 +1173,6 @@
       loadPhonicsQuestion();
 
       initBlenderFamilies();
-
       loadTalkScenario(0);
     });
 
@@ -1067,7 +1203,7 @@
     }
 
     /* =========================================================
-       6. 模式一：自然發音拼字挑戰邏輯
+       4. 模式一：拼字大冒險
        ========================================================= */
     function initBuilderCategoryTabs() {
       const container = document.getElementById('familyChips');
@@ -1091,25 +1227,20 @@
       currentWordObj = category.words[currentWordIdx];
 
       document.getElementById('targetEmoji').innerText = currentWordObj.emoji;
+      document.getElementById('targetWordTextHint').innerText = `聽「${currentWordObj.word.toUpperCase()}」發音`;
 
-      // 重設插槽與狀態
       currentSpellingSlots = new Array(currentWordObj.word.length).fill(null);
       renderSlots();
       renderLetterPool();
-
-      // 自動讀一次單字提示
-      setTimeout(() => {
-        playTargetWordSound();
-      }, 300);
     }
 
     function renderSlots() {
       const slotsContainer = document.getElementById('slotsContainer');
       slotsContainer.innerHTML = '';
-      currentSpellingSlots.forEach((char, idx) => {
+      currentSpellingSlots.forEach((item, idx) => {
         const slot = document.createElement('div');
-        slot.className = `slot ${char ? 'filled' : ''}`;
-        slot.innerText = char ? char.toUpperCase() : '';
+        slot.className = `slot ${item ? 'filled' : ''}`;
+        slot.innerText = item ? item.letter.toUpperCase() : '';
         slot.onclick = () => removeLetterFromSlot(idx);
         slotsContainer.appendChild(slot);
       });
@@ -1119,9 +1250,8 @@
       const pool = document.getElementById('letterPool');
       pool.innerHTML = '';
 
-      // 取得單字字母並混淆一些額外干擾字母
       const correctLetters = currentWordObj.word.split('');
-      const distractors = ['b', 't', 'p', 'm', 's', 'a', 'o', 'd'];
+      const distractors = ['b', 't', 'p', 'm', 's', 'a', 'o', 'd', 'e', 'g'];
       const extra = distractors.filter(l => !correctLetters.includes(l)).slice(0, 2);
       const allLetters = [...correctLetters, ...extra].sort(() => Math.random() - 0.5);
 
@@ -1130,7 +1260,6 @@
         tile.className = 'letter-tile';
         tile.innerText = letter.toUpperCase();
         tile.dataset.letter = letter;
-        tile.dataset.tileId = 'tile-' + idx;
         tile.onclick = () => selectLetterTile(tile, letter);
         pool.appendChild(tile);
       });
@@ -1139,13 +1268,11 @@
     function selectLetterTile(tileElem, letter) {
       if (tileElem.classList.contains('used')) return;
 
-      // 找到第一個空槽
       const emptyIdx = currentSpellingSlots.indexOf(null);
       if (emptyIdx === -1) return;
 
       soundLetterClick();
-      // 念出該字母的發音
-      speakText(letter, 1.0, 1.2);
+      speakText(letter, 0.95, 1.25);
 
       currentSpellingSlots[emptyIdx] = {
         letter: letter,
@@ -1154,7 +1281,6 @@
 
       tileElem.classList.add('used');
       renderSlotsFromObjects();
-
       checkSpelling();
     }
 
@@ -1190,12 +1316,10 @@
     }
 
     function checkSpelling() {
-      // 檢查是否所有插槽都填滿
       if (currentSpellingSlots.includes(null)) return;
 
       const spelled = currentSpellingSlots.map(it => it.letter).join('');
       if (spelled.toLowerCase() === currentWordObj.word.toLowerCase()) {
-        // 成功！
         soundSuccess();
         addStars(1);
         setTimeout(() => {
@@ -1204,7 +1328,7 @@
             `Great Job!`,
             `你正確拼出了「${currentWordObj.word.toUpperCase()}」(${currentWordObj.hint})！⭐ 獲得 1 顆冒險之星！`
           );
-          speakText(`Awesome! ${currentWordObj.word}!`, 0.9);
+          speakText(`Awesome! ${currentWordObj.word}!`, 0.88);
         }, 300);
       } else {
         soundWrong();
@@ -1216,34 +1340,38 @@
       const category = PHONICS_DATA[currentCategoryIdx];
       currentWordIdx = (currentWordIdx + 1) % category.words.length;
       loadPhonicsQuestion();
+      playTargetWordSound();
     }
 
     function playTargetWordSound() {
       if (!currentWordObj) return;
-      speakText(currentWordObj.word, 0.85);
+      const btn = document.getElementById('btnWordSound');
+      if (btn) btn.classList.add('speaking');
+      speakText(currentWordObj.word, 0.85, 1.1, () => {
+        if (btn) btn.classList.remove('speaking');
+      });
     }
 
     function spellOutPhonics() {
       if (!currentWordObj) return;
-      // 依序拆解發音：/k/ ... /æ/ ... /t/ ... cat!
-      const sounds = currentWordObj.phonics;
+      const letters = currentWordObj.word.split('');
       let delay = 0;
-      sounds.forEach((char, i) => {
+      letters.forEach((l, i) => {
         setTimeout(() => {
-          playTone(350 + i * 80, 'sine', 0.1, 0.12);
-          speakText(char, 0.9, 1.2);
+          playTone(360 + i * 80, 'sine', 0.12, 0.25);
+          speakText(l, 0.9, 1.25);
         }, delay);
-        delay += 750;
+        delay += 700;
       });
 
       setTimeout(() => {
-        playTone(600, 'triangle', 0.2, 0.15);
+        playTone(600, 'triangle', 0.22, 0.25);
         speakText(currentWordObj.word, 0.85);
-      }, delay + 200);
+      }, delay + 250);
     }
 
     /* =========================================================
-       7. 模式二：發音魔法鍋 (Word Blender)
+       5. 模式二：發音魔法鍋
        ========================================================= */
     function initBlenderFamilies() {
       const container = document.getElementById('blenderFamilyTags');
@@ -1272,7 +1400,6 @@
       document.getElementById('blendedWord').innerText = currentBlenderItem.word;
       document.getElementById('blendedEmoji').innerText = currentBlenderItem.emoji;
 
-      // 候選開頭字母
       const candidates = document.getElementById('onsetCandidates');
       candidates.innerHTML = '';
       fam.items.forEach(item => {
@@ -1295,30 +1422,29 @@
 
     function playChunk(type) {
       if (type === 'onset') {
-        playTone(380, 'sine', 0.12, 0.15);
+        playTone(380, 'sine', 0.12, 0.25);
         speakText(currentBlenderItem.onset, 1.0, 1.2);
       } else {
-        playTone(480, 'sine', 0.12, 0.15);
+        playTone(480, 'sine', 0.12, 0.25);
         speakText(BLENDER_FAMILIES[currentBlenderFamilyKey].rime, 0.9, 1.1);
       }
     }
 
     function playBlendedSound() {
       soundCheer();
-      // 先念聲母，再念韻尾，再合成整詞！
-      speakText(`${currentBlenderItem.onset} ... ${BLENDER_FAMILIES[currentBlenderFamilyKey].rime} ... ${currentBlenderItem.word}!`, 0.85);
+      speakText(`${currentBlenderItem.word}!`, 0.85);
       addStars(1);
     }
 
     /* =========================================================
-       8. 模式三：Toby 互動英語對話
+       6. 模式三：Toby 互動英語對話
        ========================================================= */
     function loadTalkScenario(idx) {
       currentTalkIdx = idx % CONVERSATION_SCENARIOS.length;
       const scenario = CONVERSATION_SCENARIOS[currentTalkIdx];
 
-      document.getElementById('tobySpeechEn').innerText = scenario.tobyEn;
-      document.getElementById('tobySpeechZh').innerText = scenario.tobyZh;
+      document.getElementById('tobySpeechEn').innerText = `"${scenario.tobyEn}"`;
+      document.getElementById('tobySpeechZh').innerText = `「${scenario.tobyZh}」`;
 
       const grid = document.getElementById('talkOptionsGrid');
       grid.innerHTML = '';
@@ -1333,11 +1459,6 @@
         btn.onclick = () => chooseTalkOption(opt, btn);
         grid.appendChild(btn);
       });
-
-      // 朗讀 Toby 的提問
-      setTimeout(() => {
-        playTobyVoice();
-      }, 400);
     }
 
     function playTobyVoice() {
@@ -1349,26 +1470,24 @@
       soundLetterClick();
       btnElem.classList.add('correct');
 
-      // 念出使用者的回答
-      speakText(option.text, 0.9);
-
-      // Toby 回應
-      setTimeout(() => {
-        document.getElementById('tobySpeechEn').innerText = `"${option.reply}"`;
-        document.getElementById('tobySpeechZh').innerText = `「${option.replyZh}」`;
-        speakText(option.reply, 0.88, 1.1);
-        soundSuccess();
-        addStars(1);
-
-        // 3秒後切換下一句生活對話
+      speakText(option.text, 0.9, 1.0, () => {
         setTimeout(() => {
-          loadTalkScenario(currentTalkIdx + 1);
-        }, 4000);
-      }, 1200);
+          document.getElementById('tobySpeechEn').innerText = `"${option.reply}"`;
+          document.getElementById('tobySpeechZh').innerText = `「${option.replyZh}」`;
+          speakText(option.reply, 0.88, 1.1);
+          soundSuccess();
+          addStars(1);
+
+          setTimeout(() => {
+            loadTalkScenario(currentTalkIdx + 1);
+            playTobyVoice();
+          }, 3500);
+        }, 600);
+      });
     }
 
     /* =========================================================
-       9. 獎勵視窗 Modal
+       7. 獎勵視窗 Modal
        ========================================================= */
     function showRewardModal(emoji, title, desc) {
       document.querySelector('.modal-emoji').innerText = emoji;
