@@ -3,24 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌟 Phonics & Talk Adventure - 兒童自然發音與情境英語大冒險</title>
+  <title>🌟 Phonics & Talk Adventure - 幼兒開源自然發音與語音互動學習系統</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;800&family=Quicksand:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #FF6B6B;
-      --secondary: #4ECDC4;
-      --accent: #FFE66D;
-      --purple: #9D4EDD;
-      --blue: #48CAE4;
-      --green: #52B788;
-      --orange: #FF9F1C;
-      --bg: #F0F9FF;
+      --primary: #FF5A5F;
+      --primary-light: #FFE8E9;
+      --secondary: #00A699;
+      --secondary-light: #E0F7F6;
+      --accent: #FFB400;
+      --purple: #8A4FFF;
+      --purple-light: #F2EBFF;
+      --blue: #2E86DE;
+      --blue-light: #E8F3FD;
+      --green: #2ECC71;
       --card-bg: #FFFFFF;
-      --text: #2B2D42;
-      --shadow: 0 10px 25px rgba(0,0,0,0.08);
-      --border-radius: 24px;
+      --text: #2C3A47;
+      --text-muted: #7F8C8D;
+      --shadow-sm: 0 4px 12px rgba(0,0,0,0.06);
+      --shadow-md: 0 10px 25px rgba(0,0,0,0.09);
+      --shadow-lg: 0 16px 36px rgba(0,0,0,0.14);
+      --radius-sm: 16px;
+      --radius-md: 24px;
+      --radius-lg: 32px;
     }
 
     * {
@@ -32,30 +39,36 @@
     }
 
     body {
-      font-family: 'Fredoka', 'Nunito', system-ui, sans-serif;
-      background: linear-gradient(135deg, #e0f2fe 0%, #fef3c7 50%, #f3e8ff 100%);
+      font-family: 'Fredoka', 'Quicksand', system-ui, sans-serif;
+      background: radial-gradient(circle at 10% 20%, #FFF3E0 0%, #E3F2FD 50%, #F3E5F5 100%);
       min-height: 100vh;
       color: var(--text);
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
+      position: relative;
     }
 
-    /* 頂部啟動音效提示條 (若瀏覽器尚未授權點擊) */
+    /* 頂部啟動音訊與歡迎橫條 */
     #soundBanner {
-      background: #FEF3C7;
-      color: #92400E;
-      padding: 10px 16px;
+      background: linear-gradient(90deg, #FEF08A, #FDE047);
+      color: #854D0E;
+      padding: 10px 20px;
       text-align: center;
       font-size: 1.05rem;
       font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 12px;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      z-index: 101;
+      transition: all 0.3s ease;
+    }
+
+    #soundBanner:hover {
+      background: #FACC15;
     }
 
     #soundBanner.ready {
@@ -63,11 +76,11 @@
       color: #166534;
     }
 
-    /* 頂部導航與星星看板 */
+    /* 頂部 Header */
     header {
       background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
-      padding: 12px 24px;
+      backdrop-filter: blur(12px);
+      padding: 12px 28px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -80,96 +93,146 @@
     .brand {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
+      cursor: pointer;
     }
 
-    .brand-icon {
-      font-size: 2.2rem;
-      animation: bounce 2s infinite ease-in-out;
+    .brand-avatar {
+      font-size: 2.6rem;
+      animation: bounce 2.2s infinite ease-in-out;
+      display: inline-block;
     }
 
     .brand-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      background: linear-gradient(45deg, #FF6B6B, #9D4EDD);
+      font-size: 1.55rem;
+      font-weight: 800;
+      background: linear-gradient(45deg, #FF5A5F, #8A4FFF);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      letter-spacing: 0.5px;
     }
 
-    .score-board {
+    .brand-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .header-actions {
       display: flex;
       align-items: center;
       gap: 16px;
     }
 
     .star-counter {
-      background: var(--accent);
-      color: #92400e;
-      padding: 6px 18px;
+      background: linear-gradient(135deg, #FEF08A, #FDE047);
+      color: #713F12;
+      padding: 6px 20px;
       border-radius: 50px;
-      font-size: 1.25rem;
-      font-weight: 700;
+      font-size: 1.3rem;
+      font-weight: 800;
       display: flex;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 4px 12px rgba(255, 230, 109, 0.5);
-      border: 3px solid #FDE047;
+      box-shadow: 0 4px 15px rgba(253, 224, 71, 0.5);
+      border: 3px solid #FACC15;
     }
 
-    /* 模式切換標籤頁 */
-    .tab-bar {
+    /* 分級導航標籤 Bar */
+    .nav-container {
+      width: 92%;
+      max-width: 980px;
+      margin: 18px auto 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .age-bar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .age-pill {
+      background: rgba(255, 255, 255, 0.85);
+      border: 2px solid #E2E8F0;
+      padding: 8px 18px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #64748B;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .age-pill:hover {
+      transform: translateY(-2px);
+      border-color: #CBD5E1;
+    }
+
+    .age-pill.active {
+      background: white;
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: 0 6px 18px rgba(255, 90, 95, 0.25);
+      transform: scale(1.05);
+    }
+
+    .module-tabs {
       display: flex;
       justify-content: center;
       gap: 12px;
-      margin: 20px auto 10px;
-      width: 90%;
-      max-width: 900px;
     }
 
-    .tab-btn {
+    .module-tab {
       flex: 1;
-      padding: 14px 18px;
+      padding: 14px 16px;
       font-size: 1.15rem;
-      font-weight: 700;
+      font-weight: 800;
       border: none;
-      border-radius: 20px;
+      border-radius: var(--radius-sm);
       background: white;
       color: #64748B;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
       transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-sm);
     }
 
-    .tab-btn:hover {
-      transform: translateY(-2px);
+    .module-tab:hover {
+      transform: translateY(-3px);
     }
 
-    .tab-btn.active {
+    .module-tab.active {
       background: var(--primary);
       color: white;
-      transform: scale(1.04);
-      box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+      transform: scale(1.03);
+      box-shadow: 0 8px 24px rgba(255, 90, 95, 0.35);
     }
 
-    .tab-btn:nth-child(2).active {
+    .module-tab:nth-child(2).active {
       background: var(--purple);
-      box-shadow: 0 8px 20px rgba(157, 78, 221, 0.4);
+      box-shadow: 0 8px 24px rgba(138, 79, 255, 0.35);
     }
 
-    .tab-btn:nth-child(3).active {
+    .module-tab:nth-child(3).active {
       background: var(--secondary);
-      box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+      box-shadow: 0 8px 24px rgba(0, 166, 153, 0.35);
     }
 
-    /* 主要內容區 */
+    /* 主舞台 */
     main {
       flex: 1;
-      max-width: 960px;
       width: 92%;
+      max-width: 980px;
       margin: 10px auto 40px;
       position: relative;
     }
@@ -183,20 +246,20 @@
       display: block;
     }
 
-    /* 卡片公共樣式 */
-    .game-card {
+    /* 遊戲卡片統一樣式 */
+    .card-box {
       background: white;
-      border-radius: var(--border-radius);
-      padding: 32px 24px;
-      box-shadow: var(--shadow);
+      border-radius: var(--radius-lg);
+      padding: 36px 28px;
+      box-shadow: var(--shadow-md);
       text-align: center;
       position: relative;
     }
 
-    /* =========================================
-       模式 1: 自然發音拼字挑戰 (Phonics Builder)
-       ========================================= */
-    .level-select {
+    /* ========================================================
+       模組一：自然發音探索與拼字 (Phonics Playground)
+       ======================================================== */
+    .category-scroll {
       display: flex;
       justify-content: center;
       gap: 10px;
@@ -204,122 +267,164 @@
       margin-bottom: 24px;
     }
 
-    .chip-btn {
-      padding: 8px 16px;
-      border-radius: 30px;
+    .cat-badge {
       background: #F1F5F9;
       color: #475569;
+      padding: 8px 18px;
+      border-radius: 50px;
+      font-size: 1rem;
       font-weight: 700;
       border: 2px solid transparent;
       cursor: pointer;
       transition: all 0.2s;
     }
 
-    .chip-btn.active {
-      background: #EFF6FF;
-      color: #2563EB;
-      border-color: #3B82F6;
+    .cat-badge.active {
+      background: #EEF2FF;
+      color: #4F46E5;
+      border-color: #6366F1;
+      transform: scale(1.05);
     }
 
-    .target-image-display {
-      font-size: 6.5rem;
-      margin: 10px 0;
-      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.1));
-      transition: transform 0.3s;
+    .word-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 10px 0 20px;
+    }
+
+    .big-emoji-display {
+      font-size: 6.8rem;
+      line-height: 1;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.12));
       cursor: pointer;
       display: inline-block;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    .target-image-display:hover {
+    .big-emoji-display:hover {
       transform: scale(1.15) rotate(6deg);
     }
 
-    .phonics-hint {
+    .target-word-title {
+      font-size: 2.8rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #1E293B;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .word-meaning-hint {
       font-size: 1.25rem;
       color: #64748B;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
+      font-weight: 600;
     }
 
-    .sound-btn {
-      background: #FEE2E2;
-      color: #EF4444;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 50px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 1.15rem;
-      font-weight: 700;
-      transition: all 0.2s;
-      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
-    }
-
-    .sound-btn:hover {
-      transform: scale(1.08);
-      background: #FECACA;
-    }
-
-    .sound-btn.speaking {
-      animation: pulseGlow 1s infinite alternate;
-      background: #F87171;
-      color: white;
-    }
-
-    /* 拼字格子槽 */
-    .spell-slots {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin: 24px 0 32px;
-    }
-
-    .slot {
-      width: 80px;
-      height: 88px;
-      border: 4px dashed #CBD5E1;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3rem;
-      font-weight: 900;
-      color: #1E293B;
-      background: #F8FAFC;
-      transition: all 0.3s;
-      cursor: pointer;
-    }
-
-    .slot.filled {
-      border-style: solid;
-      border-color: var(--primary);
-      background: #FFF1F2;
-      animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    /* 候選字母積木 */
-    .letter-blocks {
+    /* 多功能語音按鈕群 */
+    .sound-controls {
       display: flex;
       justify-content: center;
       gap: 14px;
       flex-wrap: wrap;
-      margin-top: 20px;
+      margin: 18px 0;
     }
 
-    .letter-tile {
-      width: 70px;
-      height: 76px;
+    .action-btn {
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    .action-btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-speak-word {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+
+    .btn-phonics-slow {
+      background: #E0E7FF;
+      color: #4338CA;
+    }
+
+    .btn-mic-repeat {
+      background: linear-gradient(135deg, #10B981, #059669);
+      color: white;
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+    }
+
+    .btn-mic-repeat.listening {
+      background: linear-gradient(135deg, #EF4444, #DC2626);
+      animation: pulseMic 1.2s infinite ease-in-out;
+    }
+
+    /* 拼字積木槽 */
+    .spelling-board {
+      margin: 28px 0 16px;
+    }
+
+    .slots-row {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .slot-card {
+      width: 84px;
+      height: 94px;
+      border: 4px dashed #CBD5E1;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.2rem;
+      font-weight: 900;
+      color: #1E293B;
+      background: #F8FAFC;
+      transition: all 0.25s;
+      cursor: pointer;
+    }
+
+    .slot-card.filled {
+      border: 4px solid var(--primary);
+      background: #FFF1F2;
+      color: var(--primary);
+      animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .letter-pool {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .tile-btn {
+      width: 74px;
+      height: 82px;
       background: linear-gradient(180deg, #FFFFFF 0%, #F1F5F9 100%);
       border: 3px solid #E2E8F0;
       border-bottom: 7px solid #CBD5E1;
-      border-radius: 18px;
-      font-size: 2.3rem;
-      font-weight: 800;
+      border-radius: 20px;
+      font-size: 2.6rem;
+      font-weight: 900;
       color: #334155;
       cursor: pointer;
       display: flex;
@@ -328,170 +433,173 @@
       transition: all 0.15s ease-out;
     }
 
-    .letter-tile:hover {
+    .tile-btn:hover {
       transform: translateY(-4px);
       border-color: #94A3B8;
     }
 
-    .letter-tile:active {
+    .tile-btn:active {
       transform: translateY(3px);
       border-bottom-width: 3px;
     }
 
-    .letter-tile.used {
-      opacity: 0.25;
+    .tile-btn.used {
+      opacity: 0.2;
       cursor: not-allowed;
       transform: scale(0.9);
       pointer-events: none;
     }
 
-    /* 動作按鈕群 */
-    .action-row {
+    /* 導航切換列 */
+    .word-nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px dashed #F1F5F9;
+    }
+
+    /* ========================================================
+       模組二：自然發音拼讀魔法鍋 (Word Blender)
+       ======================================================== */
+    .blender-header {
+      margin-bottom: 24px;
+    }
+
+    .blender-family-selector {
       display: flex;
       justify-content: center;
-      gap: 16px;
-      margin-top: 32px;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
     }
 
-    .btn {
-      padding: 12px 28px;
-      border-radius: 50px;
-      font-size: 1.15rem;
-      font-weight: 700;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s;
-    }
-
-    .btn-secondary {
-      background: #E2E8F0;
-      color: #475569;
-    }
-
-    .btn-primary {
-      background: var(--green);
-      color: white;
-      box-shadow: 0 4px 15px rgba(82, 183, 136, 0.4);
-    }
-
-    /* =========================================
-       模式 2: 音素切片與魔法合成鍋 (Word Blender)
-       ========================================= */
-    .blender-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 24px;
-    }
-
-    .blender-stage {
+    .blender-arena {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 16px;
-      margin: 20px 0;
+      gap: 18px;
+      margin: 24px 0 32px;
       flex-wrap: wrap;
     }
 
-    .chunk-box {
+    .phoneme-cube {
       background: #F8FAFC;
       border: 3px solid #E2E8F0;
-      border-radius: 20px;
-      padding: 16px 24px;
-      font-size: 2.6rem;
-      font-weight: 800;
+      border-radius: var(--radius-sm);
+      padding: 16px 28px;
+      font-size: 2.8rem;
+      font-weight: 900;
       color: var(--purple);
       cursor: pointer;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-width: 105px;
-      transition: all 0.2s;
+      min-width: 110px;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    .chunk-box:hover {
+    .phoneme-cube:hover {
       transform: scale(1.08);
       border-color: var(--purple);
       background: #FAF5FF;
     }
 
-    .chunk-tag {
-      font-size: 0.95rem;
+    .phoneme-cube small {
+      font-size: 0.9rem;
       color: #94A3B8;
-      font-weight: 600;
       margin-top: 4px;
+      font-weight: 700;
     }
 
-    .blend-symbol {
-      font-size: 2.2rem;
-      color: #CBD5E1;
+    .math-operator {
+      font-size: 2.4rem;
       font-weight: 900;
+      color: #CBD5E1;
     }
 
-    .blend-result-box {
+    .pot-cauldron {
       background: linear-gradient(135deg, #FEF08A 0%, #FDE047 100%);
-      border-radius: 24px;
-      padding: 18px 40px;
+      border-radius: 28px;
+      padding: 18px 42px;
       font-size: 3.2rem;
       font-weight: 900;
       color: #713F12;
-      box-shadow: 0 8px 24px rgba(253, 224, 71, 0.4);
+      box-shadow: 0 10px 28px rgba(253, 224, 71, 0.45);
       display: flex;
       align-items: center;
       gap: 16px;
       cursor: pointer;
-      animation: pulseGlow 2s infinite ease-in-out;
+      animation: pulseGlow 2.5s infinite ease-in-out;
+      transition: transform 0.2s;
     }
 
-    .family-tags {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 12px;
+    .pot-cauldron:hover {
+      transform: scale(1.05);
     }
 
-    /* =========================================
-       模式 3: 互動英語小夥伴 Toby (Magic Talk)
-       ========================================= */
-    .talk-container {
+    /* 聲母積木切換 */
+    .onset-tray {
+      margin-top: 14px;
+    }
+
+    /* ========================================================
+       模組三：Toby 夥伴情境英語對話 (Interactive Dialogue)
+       ======================================================== */
+    .toby-chat-stage {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
+      gap: 22px;
     }
 
-    .character-avatar {
-      font-size: 5.5rem;
-      width: 130px;
-      height: 130px;
+    .toby-avatar-wrapper {
+      position: relative;
+    }
+
+    .toby-avatar-large {
+      font-size: 6rem;
+      width: 140px;
+      height: 140px;
       background: #E0F2FE;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 5px solid #BAE6FD;
-      box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2);
-      animation: bob 3s infinite ease-in-out;
+      border: 6px solid #BAE6FD;
+      box-shadow: 0 12px 28px rgba(56, 189, 248, 0.25);
+      animation: bob 3.2s infinite ease-in-out;
       cursor: pointer;
     }
 
-    .speech-bubble {
-      background: #F8FAFC;
-      border: 3px solid #E2E8F0;
-      border-radius: 28px;
-      padding: 24px 32px;
-      position: relative;
-      max-width: 620px;
-      width: 100%;
-      text-align: left;
-      box-shadow: var(--shadow);
+    .toby-status-pill {
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #10B981;
+      color: white;
+      padding: 3px 14px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      white-space: nowrap;
     }
 
-    .speech-bubble::before {
+    .dialogue-balloon {
+      background: #F8FAFC;
+      border: 3px solid #E2E8F0;
+      border-radius: var(--radius-md);
+      padding: 26px 36px;
+      position: relative;
+      max-width: 650px;
+      width: 100%;
+      text-align: left;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .dialogue-balloon::before {
       content: '';
       position: absolute;
       top: -16px;
@@ -502,7 +610,7 @@
       border-bottom: 16px solid #E2E8F0;
     }
 
-    .speech-bubble::after {
+    .dialogue-balloon::after {
       content: '';
       position: absolute;
       top: -11px;
@@ -513,8 +621,8 @@
       border-bottom: 14px solid #F8FAFC;
     }
 
-    .dialogue-en {
-      font-size: 1.65rem;
+    .toby-english-line {
+      font-size: 1.75rem;
       font-weight: 800;
       color: #0F172A;
       display: flex;
@@ -524,28 +632,40 @@
       line-height: 1.4;
     }
 
-    .dialogue-zh {
+    .toby-chinese-line {
       font-size: 1.15rem;
       color: #64748B;
       margin-top: 8px;
+      font-weight: 600;
     }
 
-    .options-grid {
+    .toby-example-sentence {
+      font-size: 1.05rem;
+      color: var(--blue);
+      margin-top: 10px;
+      padding: 6px 12px;
+      background: var(--blue-light);
+      border-radius: 8px;
+      display: inline-block;
+      font-weight: 700;
+    }
+
+    .dialogue-options-layout {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 16px;
       width: 100%;
-      max-width: 680px;
+      max-width: 720px;
       margin-top: 10px;
     }
 
-    .talk-option {
+    .option-card-btn {
       background: white;
       border: 3px solid #E2E8F0;
-      border-radius: 20px;
-      padding: 18px 20px;
-      font-size: 1.2rem;
-      font-weight: 700;
+      border-radius: var(--radius-sm);
+      padding: 18px 22px;
+      font-size: 1.25rem;
+      font-weight: 800;
       color: #1E293B;
       cursor: pointer;
       display: flex;
@@ -553,74 +673,103 @@
       justify-content: space-between;
       transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
       box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+      text-align: left;
     }
 
-    .talk-option:hover {
+    .option-card-btn:hover {
       border-color: var(--secondary);
       background: #F0FDFA;
       transform: translateY(-3px) scale(1.02);
     }
 
-    .talk-option.correct {
+    .option-card-btn.selected {
       border-color: var(--green);
       background: #DCFCE7;
       color: #166534;
     }
 
-    /* 勝利慶祝 Overlay */
-    .celebration-modal {
+    /* 麥克風對話提示按鈕 */
+    .voice-reply-section {
+      width: 100%;
+      max-width: 720px;
+      background: #FEF3C7;
+      border-radius: var(--radius-sm);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      gap: 12px;
+    }
+
+    /* 彩花 Canvas */
+    #confettiCanvas {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(5px);
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* 慶祝獎勵彈窗 */
+    .celebration-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(6px);
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 999;
+      z-index: 1000;
     }
 
-    .modal-content {
+    .modal-box {
       background: white;
-      border-radius: 32px;
-      padding: 40px;
+      border-radius: var(--radius-lg);
+      padding: 40px 32px;
       text-align: center;
-      max-width: 440px;
+      max-width: 480px;
       width: 90%;
       animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      box-shadow: 0 24px 50px rgba(0,0,0,0.25);
     }
 
     .modal-emoji {
-      font-size: 5rem;
+      font-size: 5.5rem;
       margin-bottom: 12px;
+      display: inline-block;
       animation: spin 1s ease;
     }
 
-    .modal-title {
-      font-size: 2rem;
+    .modal-headline {
+      font-size: 2.2rem;
+      font-weight: 900;
       color: #0F172A;
-      font-weight: 800;
       margin-bottom: 8px;
     }
 
-    .modal-desc {
-      font-size: 1.2rem;
+    .modal-subtext {
+      font-size: 1.25rem;
       color: #64748B;
+      font-weight: 600;
       margin-bottom: 24px;
+      line-height: 1.5;
     }
 
-    /* 動畫效果 */
+    /* 動畫 */
     @keyframes bounce {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
+      50% { transform: translateY(-10px); }
     }
 
     @keyframes bob {
       0%, 100% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-10px) rotate(3deg); }
+      50% { transform: translateY(-8px) rotate(2deg); }
     }
 
     @keyframes popIn {
@@ -629,204 +778,253 @@
     }
 
     @keyframes pulseGlow {
-      0%, 100% { transform: scale(1); box-shadow: 0 8px 24px rgba(253, 224, 71, 0.4); }
-      50% { transform: scale(1.04); box-shadow: 0 12px 30px rgba(253, 224, 71, 0.7); }
+      0%, 100% { transform: scale(1); box-shadow: 0 10px 28px rgba(253, 224, 71, 0.45); }
+      50% { transform: scale(1.03); box-shadow: 0 14px 36px rgba(253, 224, 71, 0.7); }
+    }
+
+    @keyframes pulseMic {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); }
     }
 
     @keyframes spin {
-      0% { transform: rotate(-20deg) scale(0.8); }
+      0% { transform: rotate(-25deg) scale(0.8); }
       100% { transform: rotate(0deg) scale(1); }
     }
 
-    @media (max-width: 600px) {
-      .brand-title { font-size: 1.1rem; }
-      .tab-btn { font-size: 0.95rem; padding: 10px 8px; }
-      .slot { width: 64px; height: 72px; font-size: 2.4rem; }
-      .letter-tile { width: 56px; height: 62px; font-size: 1.9rem; }
-      .target-image-display { font-size: 5rem; }
-      .dialogue-en { font-size: 1.3rem; }
+    @media (max-width: 640px) {
+      .brand-title { font-size: 1.2rem; }
+      .module-tab { font-size: 0.95rem; padding: 10px 6px; }
+      .slot-card { width: 66px; height: 76px; font-size: 2.4rem; }
+      .tile-btn { width: 58px; height: 66px; font-size: 2rem; }
+      .target-word-title { font-size: 2.2rem; }
+      .big-emoji-display { font-size: 5rem; }
+      .toby-english-line { font-size: 1.35rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- 點擊解鎖音效提示橫條 -->
+  <!-- 彩花畫布 -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- 點擊解鎖提示 -->
   <div id="soundBanner" onclick="unlockAudioSystem()">
     <span>🔊</span>
-    <span id="soundBannerText">點擊這裡或畫面任意處，開啟發音與歡樂音效！</span>
+    <span id="soundBannerText">點擊此處或畫面任意處，開啟發音示範與歡樂音效！</span>
   </div>
 
-  <!-- 頂部資訊列 -->
+  <!-- 頂部資訊看板 -->
   <header>
-    <div class="brand">
-      <div class="brand-icon">🦁</div>
+    <div class="brand" onclick="switchAgeGroup(0)">
+      <div class="brand-avatar">🦁</div>
       <div>
         <div class="brand-title">Phonics & Talk Adventure</div>
-        <small style="color: #64748B; font-weight: 600;">兒童互動發音與會話島</small>
+        <div class="brand-subtitle">幼兒開源自然發音與語音互動學習系統</div>
       </div>
     </div>
-    <div class="score-board">
-      <div class="star-counter" id="starBadge">
+    <div class="header-actions">
+      <div class="star-counter" id="starCounter">
         <span>⭐</span>
-        <span id="starCount">0</span>
+        <span id="starNum">0</span>
       </div>
     </div>
   </header>
 
-  <!-- 模式導航標籤 -->
-  <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('builder')">
-      <span>🔤</span>
-      <span>拼字大冒險</span>
-    </button>
-    <button class="tab-btn" onclick="switchTab('blender')">
-      <span>🥣</span>
-      <span>發音魔法鍋</span>
-    </button>
-    <button class="tab-btn" onclick="switchTab('talk')">
-      <span>🐻</span>
-      <span>Toby 英語對話</span>
-    </button>
+  <!-- 分齡與模組選擇列 -->
+  <div class="nav-container">
+    <!-- 年齡層切換 -->
+    <div class="age-bar" id="ageBar">
+      <button class="age-pill active" onclick="switchAgeGroup(0)">
+        <span>🐣</span>
+        <span>4–5 歲 萌芽啟蒙島 (Letter Sounds)</span>
+      </button>
+      <button class="age-pill" onclick="switchAgeGroup(1)">
+        <span>🚀</span>
+        <span>6–7 歲 探索拼讀島 (CVC Words)</span>
+      </button>
+      <button class="age-pill" onclick="switchAgeGroup(2)">
+        <span>👑</span>
+        <span>8–9 歲 冒險會話島 (Digraphs & Sentences)</span>
+      </button>
+    </div>
+
+    <!-- 功能模組標籤 -->
+    <div class="module-tabs">
+      <button class="module-tab active" onclick="switchModule('playground')">
+        <span>🔤</span>
+        <span>發音探索與拼字</span>
+      </button>
+      <button class="module-tab" onclick="switchModule('blender')">
+        <span>🥣</span>
+        <span>發音魔法鍋 (Blending)</span>
+      </button>
+      <button class="module-tab" onclick="switchModule('talk')">
+        <span>🐻</span>
+        <span>Toby 情境對話</span>
+      </button>
+    </div>
   </div>
 
-  <!-- 主要冒險舞台 -->
+  <!-- 主學習舞台 -->
   <main>
 
-    <!-- 1. 自然發音拼字挑戰 -->
-    <section id="panel-builder" class="panel active">
-      <div class="game-card">
-        <!-- 類別切換 -->
-        <div class="level-select" id="familyChips"></div>
+    <!-- 模組 1: 發音探索與拼字 -->
+    <section id="panel-playground" class="panel active">
+      <div class="card-box">
+        <!-- 分類選擇徽章 -->
+        <div class="category-scroll" id="categoryScroll"></div>
 
-        <!-- 挑戰目標圖案 -->
-        <div class="target-image-display" id="targetEmoji" onclick="playTargetWordSound()" title="點我聽發音">
-          🐱
+        <!-- 目標單字圖案與發音展示 -->
+        <div class="word-stage">
+          <div class="big-emoji-display" id="wordEmoji" onclick="playCurrentWord(true)" title="點我聽單字發音">🐱</div>
+          <div class="target-word-title" id="wordTitle">CAT</div>
+          <div class="word-meaning-hint" id="wordMeaning">喵喵叫的可愛小貓咪</div>
         </div>
 
-        <div class="phonics-hint">
-          <button class="sound-btn" id="btnWordSound" onclick="playTargetWordSound()" title="朗讀整詞">
+        <!-- 語音控制與跟讀按鈕群 -->
+        <div class="sound-controls">
+          <button class="action-btn btn-speak-word" onclick="playCurrentWord(false)">
             <span>🔊</span>
-            <span id="targetWordTextHint">聽單字發音</span>
+            <span>聽標準發音</span>
           </button>
-          <button class="sound-btn" style="background:#E0F2FE; color:#0284C7;" onclick="spellOutPhonics()" title="拆解自然發音">
+          <button class="action-btn btn-phonics-slow" onclick="playPhonicsStepByStep()">
             <span>🧩</span>
-            <span>發音拆解教學</span>
+            <span>慢速音素拆解</span>
+          </button>
+          <button class="action-btn btn-mic-repeat" id="btnMicRepeat" onclick="startMicPractice()">
+            <span id="micIcon">🎙️</span>
+            <span id="micLabel">換我說說看 (跟讀)</span>
           </button>
         </div>
 
-        <!-- 拼字卡槽 -->
-        <div class="spell-slots" id="slotsContainer"></div>
+        <!-- 拼字卡槽與積木 -->
+        <div class="spelling-board">
+          <div class="slots-row" id="slotsRow"></div>
+          <div class="letter-pool" id="letterPool"></div>
+        </div>
 
-        <!-- 字母積木選擇區 -->
-        <div class="letter-blocks" id="letterPool"></div>
-
-        <!-- 功能列 -->
-        <div class="action-row">
-          <button class="btn btn-secondary" onclick="resetCurrentWord()">🔄 重置</button>
-          <button class="btn btn-primary" onclick="nextPhonicsWord()">下一題 ➔</button>
+        <!-- 底部切換列 -->
+        <div class="word-nav-row">
+          <button class="action-btn" style="background:#F1F5F9; color:#475569;" onclick="resetCurrentSpelling()">
+            🔄 重置積木
+          </button>
+          <div style="font-size: 1.1rem; font-weight: 700; color:#94A3B8;" id="progressLabel">1 / 5</div>
+          <button class="action-btn" style="background:var(--blue); color:white;" onclick="nextWord()">
+            下一關 ➔
+          </button>
         </div>
       </div>
     </section>
 
-    <!-- 2. 音素切片與魔法合成鍋 -->
+    <!-- 模組 2: 發音魔法鍋 -->
     <section id="panel-blender" class="panel">
-      <div class="game-card">
-        <h2 style="font-size: 1.8rem; margin-bottom: 8px; color: #475569;">🥣 自然發音拼讀魔法鍋 (Blending)</h2>
-        <p style="color: #64748B; margin-bottom: 20px;">點擊音素積木聽發音，再點金色魔法鍋將聲音「黏」在一起！</p>
+      <div class="card-box">
+        <div class="blender-header">
+          <h2 style="font-size: 2rem; color: #334155; margin-bottom: 6px;">🥣 自然發音拼讀魔法鍋 (Blending)</h2>
+          <p style="color: #64748B; font-size: 1.1rem;">點擊左側「首音」與右側「韻尾」聽音素，再點金色魔法鍋將聲音合成一個完整單字！</p>
+        </div>
 
-        <!-- 韻尾家族選擇 -->
-        <div class="family-tags" id="blenderFamilyTags"></div>
+        <!-- 家族標籤 -->
+        <div class="blender-family-selector" id="blenderFamilies"></div>
 
-        <div class="blender-container">
-          <div class="blender-stage">
-            <!-- 首音 Onset -->
-            <div class="chunk-box" id="onsetBox" onclick="playChunk('onset')">
-              <span id="onsetText">c</span>
-              <span class="chunk-tag">首音 (Onset)</span>
-            </div>
-
-            <div class="blend-symbol">+</div>
-
-            <!-- 韻尾 Rime -->
-            <div class="chunk-box" id="rimeBox" onclick="playChunk('rime')">
-              <span id="rimeText">at</span>
-              <span class="chunk-tag">韻尾 (Rime)</span>
-            </div>
-
-            <div class="blend-symbol">=</div>
-
-            <!-- 合成詞 -->
-            <div class="blend-result-box" onclick="playBlendedSound()" title="點我魔法合成！">
-              <span id="blendedEmoji">🐱</span>
-              <span id="blendedWord">cat</span>
-              <span style="font-size: 1.5rem;">🪄</span>
-            </div>
+        <div class="blender-arena">
+          <!-- 首音 (Onset) -->
+          <div class="phoneme-cube" id="onsetCube" onclick="playBlenderPart('onset')">
+            <span id="blenderOnsetText">c</span>
+            <small>首音 (Onset)</small>
           </div>
 
-          <!-- 快速切換聲母積木 -->
-          <div style="margin-top: 10px;">
-            <p style="font-size: 1rem; color: #94A3B8; margin-bottom: 10px; font-weight: 700;">換一個字母拼拼看：</p>
-            <div class="letter-blocks" id="onsetCandidates"></div>
+          <div class="math-operator">+</div>
+
+          <!-- 韻尾 (Rime) -->
+          <div class="phoneme-cube" id="rimeCube" onclick="playBlenderPart('rime')">
+            <span id="blenderRimeText">at</span>
+            <small>韻尾 (Rime)</small>
           </div>
+
+          <div class="math-operator">=</div>
+
+          <!-- 合成魔法鍋 -->
+          <div class="pot-cauldron" onclick="blendAndCelebrate()" title="點我魔法合成！">
+            <span id="potEmoji">🐱</span>
+            <span id="potWord">cat</span>
+            <span style="font-size: 2rem;">🪄</span>
+          </div>
+        </div>
+
+        <!-- 聲母替換按鈕盤 -->
+        <div class="onset-tray">
+          <p style="font-weight: 800; color: #64748B; margin-bottom: 12px;">👇 換一個開頭字母試試看：</p>
+          <div class="letter-pool" id="onsetCandidates"></div>
         </div>
       </div>
     </section>
 
-    <!-- 3. Toby 互動英語小夥伴 (Dialogue) -->
+    <!-- 模組 3: Toby 情境對話 -->
     <section id="panel-talk" class="panel">
-      <div class="game-card">
-        <div class="talk-container">
-          <!-- 角色 Toby -->
-          <div class="character-avatar" id="tobyAvatar" onclick="playTobyVoice()">
-            🐻
-          </div>
-
-          <!-- 對話框 -->
-          <div class="speech-bubble">
-            <div class="dialogue-en">
-              <span id="tobySpeechEn">"Hello! What's your name?"</span>
-              <button class="sound-btn" style="padding: 6px 14px;" onclick="playTobyVoice()" title="重播 Toby 發音">🔊</button>
+      <div class="card-box">
+        <div class="toby-chat-stage">
+          <!-- Toby 頭像 -->
+          <div class="toby-avatar-wrapper">
+            <div class="toby-avatar-large" id="tobyAvatar" onclick="speakTobyLine()">
+              🐻
             </div>
-            <div class="dialogue-zh" id="tobySpeechZh">「嗨！你叫什麼名字呢？」</div>
+            <div class="toby-status-pill">Toby 熊熊</div>
           </div>
 
-          <p style="font-size: 1.1rem; color: #64748B; font-weight: 700; margin-top: 8px;">
-            👇 選一個回答來跟 Toby 聊天吧！
-          </p>
+          <!-- 說話氣泡 -->
+          <div class="dialogue-balloon">
+            <div class="toby-english-line">
+              <span id="tobyLineEn">"Hello there! What is your name?"</span>
+              <button class="action-btn" style="padding: 6px 14px; font-size: 1rem; background: #E0F2FE; color: #0284C7;" onclick="speakTobyLine()" title="重聽 Toby 發音">🔊 示範</button>
+            </div>
+            <div class="toby-chinese-line" id="tobyLineZh">「哈囉！請問你的名字是什麼呢？」</div>
+            <div class="toby-example-sentence" id="tobyTip">💡 點選下方回答或按麥克風大聲念出來喔！</div>
+          </div>
 
-          <!-- 互動選項卡 -->
-          <div class="options-grid" id="talkOptionsGrid"></div>
+          <!-- 麥克風語音互動提示條 -->
+          <div class="voice-reply-section">
+            <span style="font-size: 1.1rem; font-weight: 700; color: #92400E;">🎙️ 想直接跟 Toby 說話嗎？</span>
+            <button class="action-btn btn-mic-repeat" style="padding: 8px 18px;" onclick="startTobyMic()">
+              <span>🎤</span>
+              <span>用語音回答</span>
+            </button>
+          </div>
+
+          <!-- 回答選項卡片 -->
+          <div class="dialogue-options-layout" id="dialogueOptionsGrid"></div>
         </div>
       </div>
     </section>
 
   </main>
 
-  <!-- 彈跳獎勵視窗 -->
-  <div class="celebration-modal" id="rewardModal">
-    <div class="modal-content">
-      <div class="modal-emoji">🎉</div>
-      <div class="modal-title">太棒了！Super Star!</div>
-      <div class="modal-desc" id="rewardDesc">你學會拼出了 CAT！+1 顆金色星星！</div>
-      <button class="btn btn-primary" style="margin: 0 auto;" onclick="closeModalAndContinue()">繼續闖關 🚀</button>
+  <!-- 慶祝過關彈窗 -->
+  <div class="celebration-overlay" id="celebrationModal">
+    <div class="modal-box">
+      <div class="modal-emoji">🌟</div>
+      <div class="modal-headline">Super Star!</div>
+      <div class="modal-subtext" id="modalMessage">太厲害了！你完成了一個重要發音！獲得 1 顆金色星星！</div>
+      <button class="action-btn" style="background:var(--green); color:white; margin: 0 auto; font-size: 1.25rem; padding: 12px 36px;" onclick="closeModal()">
+        繼續前進 🚀
+      </button>
     </div>
   </div>
 
   <script>
     /* =========================================================
-       1. 萬用音訊引擎與語音雙核心 (Hybrid Audio & Speech)
+       1. 音效與雙軌發音引擎 (Web Audio API + Web Speech / Online)
        ========================================================= */
     let audioCtx = null;
     let audioUnlocked = false;
     let preferredVoice = null;
+    let currentAudioFallback = null;
 
-    // 取得或初始化 AudioContext
-    function getAudioContext() {
+    function getAudioCtx() {
       if (!audioCtx) {
         const AudioClass = window.AudioContext || window.webkitAudioContext;
-        if (AudioClass) {
-          audioCtx = new AudioClass();
-        }
+        if (AudioClass) audioCtx = new AudioClass();
       }
       if (audioCtx && audioCtx.state === 'suspended') {
         audioCtx.resume();
@@ -834,56 +1032,44 @@
       return audioCtx;
     }
 
-    // 全域解鎖器：符合瀏覽器 Autoplay 安全策略
     function unlockAudioSystem() {
-      const ctx = getAudioContext();
-      if (ctx && ctx.state === 'suspended') {
-        ctx.resume();
-      }
+      const ctx = getAudioCtx();
+      if (ctx && ctx.state === 'suspended') ctx.resume();
 
-      // 載入語音清單
-      initVoices();
-
+      loadVoices();
       audioUnlocked = true;
-      const banner = document.getElementById('soundBanner');
-      const bannerText = document.getElementById('soundBannerText');
-      if (banner && bannerText) {
-        banner.classList.add('ready');
-        bannerText.innerHTML = '🎉 發音與音效系統已就緒！盡情探索吧！';
-        setTimeout(() => {
-          banner.style.display = 'none';
-        }, 1500);
-      }
 
-      // 播放輕快確認音
-      playTone(587.33, 'sine', 0.15, 0.25);
+      const banner = document.getElementById('soundBanner');
+      const text = document.getElementById('soundBannerText');
+      if (banner && text) {
+        banner.classList.add('ready');
+        text.innerHTML = '🎉 發音與語音互動系統已啟動！點擊即可發音！';
+        setTimeout(() => { banner.style.display = 'none'; }, 1600);
+      }
+      playCheerTune(false);
     }
 
-    // 點擊頁面任何地方皆自動解鎖
     window.addEventListener('pointerdown', () => {
       if (!audioUnlocked) unlockAudioSystem();
     }, { once: true });
 
-    // Web Speech API Voice 挑選
-    function initVoices() {
+    function loadVoices() {
       if (!('speechSynthesis' in window)) return;
       const voices = window.speechSynthesis.getVoices();
       if (voices.length > 0) {
-        // 優先找美式英文兒童/真人語音
         preferredVoice = voices.find(v => v.lang === 'en-US' && (v.name.includes('Natural') || v.name.includes('Samantha') || v.name.includes('Zira') || v.name.includes('Google')))
           || voices.find(v => v.lang.startsWith('en'))
           || voices[0];
       }
     }
-
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = initVoices;
+      window.speechSynthesis.onvoiceschanged = loadVoices;
     }
 
-    // 播放合成卡通樂音 (Web Audio API)
-    function playTone(freq, type = 'sine', duration = 0.18, gainVal = 0.2) {
+    // 播放合成卡通樂音
+    function playBeep(freq, type = 'sine', duration = 0.15, gainVal = 0.25) {
       try {
-        const ctx = getAudioContext();
+        const ctx = getAudioCtx();
         if (!ctx) return;
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -895,133 +1081,203 @@
         gain.connect(ctx.destination);
         osc.start();
         osc.stop(ctx.currentTime + duration);
-      } catch (e) {
-        console.warn('Audio tone error:', e);
-      }
+      } catch(e) {}
     }
 
-    function soundLetterClick() {
-      playTone(520, 'triangle', 0.1, 0.25);
+    function playClickSound() { playBeep(520, 'triangle', 0.08, 0.2); }
+    function playWrongSound() { playBeep(220, 'sawtooth', 0.22, 0.2); }
+
+    function playSuccessTune() {
+      setTimeout(() => playBeep(523.25, 'sine', 0.12, 0.3), 0);
+      setTimeout(() => playBeep(659.25, 'sine', 0.12, 0.3), 100);
+      setTimeout(() => playBeep(783.99, 'sine', 0.2, 0.3), 200);
+      setTimeout(() => playBeep(1046.50, 'sine', 0.35, 0.35), 320);
     }
 
-    function soundSuccess() {
-      setTimeout(() => playTone(523.25, 'sine', 0.12, 0.3), 0);
-      setTimeout(() => playTone(659.25, 'sine', 0.12, 0.3), 100);
-      setTimeout(() => playTone(783.99, 'sine', 0.2, 0.3), 200);
-      setTimeout(() => playTone(1046.50, 'sine', 0.35, 0.35), 320);
-    }
-
-    function soundCheer() {
-      const freqs = [440, 554, 659, 880];
-      freqs.forEach((f, i) => {
-        setTimeout(() => playTone(f, 'triangle', 0.18, 0.2), i * 90);
+    function playCheerTune(full = true) {
+      const notes = full ? [440, 554, 659, 880, 1108] : [440, 659];
+      notes.forEach((f, i) => {
+        setTimeout(() => playBeep(f, 'triangle', 0.15, 0.2), i * 80);
       });
     }
 
-    function soundWrong() {
-      playTone(200, 'sawtooth', 0.22, 0.2);
-    }
-
-    /* =========================================================
-       雙軌語音播放：Web Speech + 線上音訊 Fallback (確保100%有聲)
-       ========================================================= */
-    let currentAudioElem = null;
-
-    function playAudioFallback(text, onEnded) {
-      try {
-        if (currentAudioElem) {
-          currentAudioElem.pause();
-          currentAudioElem = null;
-        }
-        // 使用公開純音訊字典發音 CDN (支援單字及短句)
-        const cleanText = text.replace(/[^a-zA-Z\s]/g, '').trim();
-        const audioUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanText)}&type=2`;
-        currentAudioElem = new Audio(audioUrl);
-        currentAudioElem.onended = () => { if (onEnded) onEnded(); };
-        currentAudioElem.onerror = () => { if (onEnded) onEnded(); };
-        currentAudioElem.play().catch(e => {
-          console.warn('Fallback audio failed to play:', e);
-          if (onEnded) onEnded();
-        });
-      } catch (e) {
-        if (onEnded) onEnded();
-      }
-    }
-
-    function speakText(text, rate = 0.85, pitch = 1.1, callback = null) {
+    // 發音播放 (支援本地語音合成 + 線上純音訊雙保險)
+    function speakText(text, rate = 0.85, pitch = 1.1, onEnd = null) {
       if (!audioUnlocked) unlockAudioSystem();
 
-      // 檢查 Web Speech API 是否就緒且可用
+      const cleanText = text.replace(/[^a-zA-Z\s]/g, '').trim();
+
+      // 優先使用 Web Speech API
       if ('speechSynthesis' in window) {
         try {
-          window.speechSynthesis.cancel(); // 清空隊列
-          
+          window.speechSynthesis.cancel();
           const utterance = new SpeechSynthesisUtterance(text);
           utterance.lang = 'en-US';
           utterance.rate = rate;
           utterance.pitch = pitch;
           if (preferredVoice) utterance.voice = preferredVoice;
 
-          let spoken = false;
-          utterance.onstart = () => { spoken = true; };
-          utterance.onend = () => { if (callback) callback(); };
-          utterance.onerror = (e) => {
-            console.warn('SpeechSynthesis error, switching to audio fallback:', e);
-            playAudioFallback(text, callback);
-          };
+          let hasSpoken = false;
+          utterance.onstart = () => { hasSpoken = true; };
+          utterance.onend = () => { if (onEnd) onEnd(); };
+          utterance.onerror = () => { playFallbackAudio(cleanText, onEnd); };
 
           window.speechSynthesis.speak(utterance);
 
-          // 防止 file:// 下 speechSynthesis 卡住未出聲的容錯計時器
+          // 防止 file:// 協定下可能暫停的防卡機制
           setTimeout(() => {
-            if (!spoken && window.speechSynthesis.speaking === false) {
-              playAudioFallback(text, callback);
+            if (!hasSpoken && window.speechSynthesis.speaking === false) {
+              playFallbackAudio(cleanText, onEnd);
             }
           }, 350);
           return;
-        } catch (err) {
-          console.warn('SpeechSynthesis exception:', err);
+        } catch (e) {
+          console.warn('SpeechSynthesis err:', e);
         }
       }
 
-      // 若不支援 SpeechSynthesis 則直接走 Fallback
-      playAudioFallback(text, callback);
+      playFallbackAudio(cleanText, onEnd);
+    }
+
+    function playFallbackAudio(text, onEnd) {
+      try {
+        if (currentAudioFallback) {
+          currentAudioFallback.pause();
+          currentAudioFallback = null;
+        }
+        const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=2`;
+        currentAudioFallback = new Audio(url);
+        currentAudioFallback.onended = () => { if (onEnd) onEnd(); };
+        currentAudioFallback.onerror = () => { if (onEnd) onEnd(); };
+        currentAudioFallback.play().catch(() => { if (onEnd) onEnd(); });
+      } catch (e) {
+        if (onEnd) onEnd();
+      }
     }
 
     /* =========================================================
-       2. 題庫與自然發音資料庫
+       2. 分齡系統化教材資料庫 (4-5歲 / 6-7歲 / 8-9歲)
        ========================================================= */
-    const PHONICS_DATA = [
+    const CURRICULUM_DATA = [
       {
-        category: 'Short a',
-        words: [
-          { word: 'cat', emoji: '🐱', phonics: ['c', 'a', 't'], hint: '喵喵叫的小貓咪' },
-          { word: 'bat', emoji: '🦇', phonics: ['b', 'a', 't'], hint: '夜晚飛行的蝙蝠' },
-          { word: 'hat', emoji: '👒', phonics: ['h', 'a', 't'], hint: '太陽大戴的帽子' },
-          { word: 'bag', emoji: '🎒', phonics: ['b', 'a', 'g'], hint: '上學背的書包' }
+        ageGroup: '4–5 歲 萌芽啟蒙島',
+        desc: '專注單一字母音、活潑動物與生活模仿，聽一次、說一次！',
+        categories: [
+          {
+            name: '基礎音素入門',
+            words: [
+              { word: 'cat', emoji: '🐱', phonics: ['c', 'a', 't'], hint: '喵喵叫的小貓咪' },
+              { word: 'sun', emoji: '☀️', phonics: ['s', 'u', 'n'], hint: '溫暖照耀的大太陽' },
+              { word: 'pig', emoji: '🐷', phonics: ['p', 'i', 'g'], hint: '可愛的粉紅小豬' },
+              { word: 'dog', emoji: '🐶', phonics: ['d', 'o', 'g'], hint: '搖尾巴的乖狗狗' },
+              { word: 'bus', emoji: '🚌', phonics: ['b', 'u', 's'], hint: '上學搭的黃色大公車' }
+            ]
+          },
+          {
+            name: '色彩與食物',
+            words: [
+              { word: 'red', emoji: '🍎', phonics: ['r', 'e', 'd'], hint: '像甜蘋果一樣的紅色' },
+              { word: 'egg', emoji: '🥚', phonics: ['e', 'g', 'g'], hint: '營養豐富的白雞蛋' },
+              { word: 'cup', emoji: '🥤', phonics: ['c', 'u', 'p'], hint: '喝牛奶用的小水杯' },
+              { word: 'nut', emoji: '🥜', phonics: ['n', 'u', 't'], hint: '香香脆脆的花生堅果' }
+            ]
+          }
+        ],
+        dialogues: [
+          {
+            tobyEn: "Hello! What is your name? 👋",
+            tobyZh: "哈囉！你叫什麼名字呢？",
+            options: [
+              { text: "My name is Timmy! 👦", reply: "Nice to meet you, Timmy! You are so awesome! 🌟", replyZh: "很高興認識你，Timmy！你真棒！" },
+              { text: "I am Lily! 👧", reply: "Nice to meet you, Lily! Let's be best friends! ✨", replyZh: "很高興認識你，Lily！我們當好朋友吧！" },
+              { text: "Good morning! ☀️", reply: "Good morning! Wishing you a sunny happy day! 🌈", replyZh: "早安！祝你有個陽光燦爛的一天！" }
+            ]
+          },
+          {
+            tobyEn: "What animal do you love the most? 🐾",
+            tobyZh: "你最喜歡什麼動物呀？",
+            options: [
+              { text: "I love cats! 🐱", reply: "Meow! Cats are soft, cuddly and cute! 🐾", replyZh: "喵～！貓咪軟綿綿的超可愛！" },
+              { text: "I love dogs! 🐶", reply: "Woof! Dogs love to play with balls! 🎾", replyZh: "汪汪！狗狗最喜歡玩球了！" },
+              { text: "I love cute birds! 🐦", reply: "Tweet tweet! Birds can fly high in the blue sky! 🕊️", replyZh: "啾啾！小鳥可以在藍天飛得好高！" }
+            ]
+          }
         ]
       },
       {
-        category: 'Short e & i',
-        words: [
-          { word: 'pen', emoji: '🖊️', phonics: ['p', 'e', 'n'], hint: '寫作業用的原子筆' },
-          { word: 'bed', emoji: '🛏️', phonics: ['b', 'e', 'd'], hint: '睡覺的舒服大床' },
-          { word: 'pig', emoji: '🐷', phonics: ['p', 'i', 'g'], hint: '粉紅色的小豬' },
-          { word: 'sun', emoji: '☀️', phonics: ['s', 'u', 'n'], hint: '天空中的溫暖太陽' }
+        ageGroup: '6–7 歲 探索拼讀島',
+        desc: '掌握 CVC 短母音拼讀與字族規律，建立直覺拼字能力！',
+        categories: [
+          {
+            name: 'Short a & e 拼讀',
+            words: [
+              { word: 'bat', emoji: '🦇', phonics: ['b', 'a', 't'], hint: '夜空裡飛舞的蝙蝠' },
+              { word: 'hat', emoji: '👒', phonics: ['h', 'a', 't'], hint: '出門戴的漂亮遮陽帽' },
+              { word: 'pen', emoji: '🖊️', phonics: ['p', 'e', 'n'], hint: '畫畫寫字的原子筆' },
+              { word: 'bed', emoji: '🛏️', phonics: ['b', 'e', 'd'], hint: '睡好覺的柔軟床鋪' }
+            ]
+          },
+          {
+            name: 'Short i, o, u 拼讀',
+            words: [
+              { word: 'fox', emoji: '🦊', phonics: ['f', 'o', 'x'], hint: '聰明機靈的紅狐狸' },
+              { word: 'box', emoji: '📦', phonics: ['b', 'o', 'x'], hint: '裝滿驚喜的大紙箱' },
+              { word: 'run', emoji: '🏃', phonics: ['r', 'u', 'n'], hint: '操場上快樂奔跑' },
+              { word: 'big', emoji: '🐘', phonics: ['b', 'i', 'g'], hint: '像大象一樣好大好大' }
+            ]
+          }
+        ],
+        dialogues: [
+          {
+            tobyEn: "What fruit do you like to eat? 🍎🍌",
+            tobyZh: "你平時最喜歡吃什麼水果呢？",
+            options: [
+              { text: "I like sweet apples! 🍎", reply: "An apple a day keeps the doctor away! 😋", replyZh: "一天一顆蘋果，健康又聰明！" },
+              { text: "I love yellow bananas! 🍌", reply: "Yummy! Bananas give us super strong energy! ⚡", replyZh: "好好吃！香蕉給我們滿滿活力！" },
+              { text: "I like juicy watermelons! 🍉", reply: "Cool and refreshing! Perfect for summer! 🌞", replyZh: "清涼多汁，夏天吃最消暑啦！" }
+            ]
+          },
+          {
+            tobyEn: "What is your favorite color in the rainbow? 🌈",
+            tobyZh: "彩虹裡你最喜歡什麼顏色？",
+            options: [
+              { text: "I like cool Blue! 🌊", reply: "Blue is peaceful like the wide ocean! 🐬", replyZh: "藍色像遼闊平靜的海洋一樣美麗！" },
+              { text: "I love bright Yellow! 🌻", reply: "Yellow is warm like sunshine and happy flowers! ☀️", replyZh: "黃色就像溫暖的陽光與向日葵！" },
+              { text: "I like fresh Green! 🍀", reply: "Green is lively like big trees in the forest! 🌲", replyZh: "綠色就像森林裡充滿生機的大樹！" }
+            ]
+          }
         ]
       },
       {
-        category: 'Short o & u',
-        words: [
-          { word: 'dog', emoji: '🐶', phonics: ['d', 'o', 'g'], hint: '汪汪叫的忠誠狗狗' },
-          { word: 'fox', emoji: '🦊', phonics: ['f', 'o', 'x'], hint: '機靈可愛的小狐狸' },
-          { word: 'bus', emoji: '🚌', phonics: ['b', 'u', 's'], hint: '出門搭乘的大公車' },
-          { word: 'cup', emoji: '🥤', phonics: ['c', 'u', 'p'], hint: '喝水用的小杯子' }
+        ageGroup: '8–9 歲 冒險會話島',
+        desc: '雙子音、複合音（Digraphs）與生活情境問答，訓練自信表達！',
+        categories: [
+          {
+            name: '雙子音 Blends & Digraphs',
+            words: [
+              { word: 'ship', emoji: '🚢', phonics: ['sh', 'i', 'p'], hint: '大海上航行的大輪船 (sh)' },
+              { word: 'fish', emoji: '🐟', phonics: ['f', 'i', 'sh'], hint: '海裡游來游去的小魚 (sh)' },
+              { word: 'duck', emoji: '🦆', phonics: ['d', 'u', 'ck'], hint: '池塘裡戲水的小鴨 (ck)' },
+              { word: 'tree', emoji: '🌳', phonics: ['t', 'r', 'ee'], hint: '長滿綠葉的茂盛大樹 (ee)' }
+            ]
+          }
+        ],
+        dialogues: [
+          {
+            tobyEn: "How was your day at school today? 🎒",
+            tobyZh: "你今天在學校過得開心嗎？",
+            options: [
+              { text: "It was great! I learned a lot! 📚", reply: "That is wonderful! Knowledge makes you powerful! 🚀", replyZh: "太棒了！知識讓你變得好有力量！" },
+              { text: "I played football with friends! ⚽", reply: "Sports and teamwork are fantastic! 🏆", replyZh: "運動和團隊合作最讓人開心了！" },
+              { text: "A bit busy, but I am happy! 😊", reply: "You worked really hard today! Proud of you! 💖", replyZh: "今天辛苦了，你真的很棒，為你驕傲！" }
+            ]
+          }
         ]
       }
     ];
 
-    const BLENDER_FAMILIES = {
+    // 發音魔法鍋字族庫
+    const BLENDER_CATALOG = {
       '-at': {
         rime: 'at',
         items: [
@@ -1037,17 +1293,8 @@
         items: [
           { onset: 'd', word: 'dog', emoji: '🐶' },
           { onset: 'f', word: 'fog', emoji: '🌫️' },
-          { onset: 'j', word: 'jog', emoji: '🏃' },
-          { onset: 'l', word: 'log', emoji: '🪵' }
-        ]
-      },
-      '-ig': {
-        rime: 'ig',
-        items: [
-          { onset: 'p', word: 'pig', emoji: '🐷' },
-          { onset: 'b', word: 'big', emoji: '🐘' },
-          { onset: 'd', word: 'dig', emoji: '⛏️' },
-          { onset: 'w', word: 'wig', emoji: '💇' }
+          { onset: 'l', word: 'log', emoji: '🪵' },
+          { onset: 'j', word: 'jog', emoji: '🏃' }
         ]
       },
       '-un': {
@@ -1058,331 +1305,357 @@
           { onset: 'f', word: 'fun', emoji: '🎡' },
           { onset: 'b', word: 'bun', emoji: '🥯' }
         ]
+      },
+      '-ig': {
+        rime: 'ig',
+        items: [
+          { onset: 'p', word: 'pig', emoji: '🐷' },
+          { onset: 'b', word: 'big', emoji: '🐘' },
+          { onset: 'd', word: 'dig', emoji: '⛏️' }
+        ]
       }
     };
 
-    const CONVERSATION_SCENARIOS = [
-      {
-        tobyEn: "Hello! What is your name? 👋",
-        tobyZh: "嗨！請問你的名字是什麼呢？",
-        options: [
-          {
-            text: "My name is Timmy! 👦",
-            reply: "Nice to meet you, Timmy! You are so awesome! 🌟",
-            replyZh: "很高興認識你，Timmy！你真棒！"
-          },
-          {
-            text: "I am Lily! 👧",
-            reply: "Nice to meet you, Lily! Let's be best friends! ✨",
-            replyZh: "很高興認識你，Lily！我們當好朋友吧！"
-          },
-          {
-            text: "Good morning! ☀️",
-            reply: "Good morning! Wishing you a sunny happy day! 🌈",
-            replyZh: "早安！祝你有個陽光明媚快樂的一天！"
-          }
-        ]
-      },
-      {
-        tobyEn: "I love animals! Do you like cats or dogs? 🐶🐱",
-        tobyZh: "我好喜歡動物！你比較喜歡小貓還是小狗呢？",
-        options: [
-          {
-            text: "I love cute cats! 🐱",
-            reply: "Meow! Cats are super soft and cute! 🐾",
-            replyZh: "喵～！貓咪真的超柔軟又可愛！"
-          },
-          {
-            text: "I love playful dogs! 🐶",
-            reply: "Woof! Dogs love to run and fetch balls! 🎾",
-            replyZh: "汪汪！狗狗最喜歡跑步丟球了！"
-          },
-          {
-            text: "I love both of them! 💖",
-            reply: "Yay! You have such a kind heart for all pets! 🐾",
-            replyZh: "太好了！你對小動物真的很有愛心！"
-          }
-        ]
-      },
-      {
-        tobyEn: "What is your favorite color? 🎨",
-        tobyZh: "你最喜歡什麼顏色呢？",
-        options: [
-          {
-            text: "I like Red! 🍎",
-            reply: "Red is bright like a sweet shiny apple! 🍎",
-            replyZh: "紅色就像一顆甜甜發亮的紅蘋果！"
-          },
-          {
-            text: "I like Blue! 🌊",
-            reply: "Blue is cool like the open sky and ocean! 🌊",
-            replyZh: "藍色就像遼闊的晴空與海洋一樣舒服！"
-          },
-          {
-            text: "I like Yellow! 🌻",
-            reply: "Yellow is warm and happy like sunshine! ☀️",
-            replyZh: "黃色就像溫暖又歡樂的陽光！"
-          }
-        ]
-      },
-      {
-        tobyEn: "How are you feeling today? 😊",
-        tobyZh: "你今天的心情感覺怎麼樣呀？",
-        options: [
-          {
-            text: "I feel super happy! 🎉",
-            reply: "Awesome! Your big smile makes me happy too! 🥳",
-            replyZh: "太棒了！你的燦爛笑容也讓我好開心！"
-          },
-          {
-            text: "I am ready to learn! 📚",
-            reply: "Wow, you are such a smart and curious student! 🚀",
-            replyZh: "哇，你真是一位既聰明又充滿好奇心的小博士！"
-          },
-          {
-            text: "A bit sleepy, but excited! 😴✨",
-            reply: "Let's do some funny stretches and wake up! 🤸",
-            replyZh: "那我們一起動動身體伸個懶腰提神吧！"
-          }
-        ]
-      }
-    ];
-
     /* =========================================================
-       3. 狀態與流程控制
+       3. 全域狀態
        ========================================================= */
     let stars = 0;
-    let currentCategoryIdx = 0;
+    let currentAgeIdx = 0;
+    let currentCatIdx = 0;
     let currentWordIdx = 0;
-    let currentSpellingSlots = [];
-    let currentWordObj = null;
 
-    let currentBlenderFamilyKey = '-at';
+    let currentSlots = [];
+    let currentTargetWordObj = null;
+
+    // Blender 狀態
+    let currentBlenderKey = '-at';
     let currentBlenderItem = null;
 
-    let currentTalkIdx = 0;
+    // Toby 對話狀態
+    let currentDialogueIdx = 0;
 
+    /* =========================================================
+       4. 初始化與頁面控制
+       ========================================================= */
     window.addEventListener('DOMContentLoaded', () => {
-      const savedStars = localStorage.getItem('phonics_adventure_stars');
-      if (savedStars) {
-        stars = parseInt(savedStars, 10) || 0;
-        updateStarDisplay();
+      const saved = localStorage.getItem('phonics_stars_v2');
+      if (saved) {
+        stars = parseInt(saved, 10) || 0;
+        updateStarUI();
       }
 
-      initBuilderCategoryTabs();
-      loadPhonicsQuestion();
-
-      initBlenderFamilies();
-      loadTalkScenario(0);
+      initCurriculum();
+      initBlender();
+      loadDialogue(0);
+      setupConfetti();
     });
 
-    function addStars(num = 1) {
-      stars += num;
-      localStorage.setItem('phonics_adventure_stars', stars);
-      updateStarDisplay();
+    function addStar(count = 1) {
+      stars += count;
+      localStorage.setItem('phonics_stars_v2', stars);
+      updateStarUI();
+      launchConfetti();
     }
 
-    function updateStarDisplay() {
-      document.getElementById('starCount').innerText = stars;
+    function updateStarUI() {
+      document.getElementById('starNum').innerText = stars;
     }
 
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    function switchAgeGroup(idx) {
+      currentAgeIdx = idx;
+      currentCatIdx = 0;
+      currentWordIdx = 0;
+
+      document.querySelectorAll('.age-pill').forEach((p, i) => {
+        p.classList.toggle('active', i === idx);
+      });
+
+      initCurriculum();
+      loadDialogue(0);
+    }
+
+    function switchModule(mod) {
+      document.querySelectorAll('.module-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
 
-      if (tabId === 'builder') {
-        document.querySelectorAll('.tab-btn')[0].classList.add('active');
-        document.getElementById('panel-builder').classList.add('active');
-      } else if (tabId === 'blender') {
-        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+      if (mod === 'playground') {
+        document.querySelectorAll('.module-tab')[0].classList.add('active');
+        document.getElementById('panel-playground').classList.add('active');
+      } else if (mod === 'blender') {
+        document.querySelectorAll('.module-tab')[1].classList.add('active');
         document.getElementById('panel-blender').classList.add('active');
-      } else if (tabId === 'talk') {
-        document.querySelectorAll('.tab-btn')[2].classList.add('active');
+      } else if (mod === 'talk') {
+        document.querySelectorAll('.module-tab')[2].classList.add('active');
         document.getElementById('panel-talk').classList.add('active');
       }
     }
 
     /* =========================================================
-       4. 模式一：拼字大冒險
+       5. 模組一：發音探索與拼字
        ========================================================= */
-    function initBuilderCategoryTabs() {
-      const container = document.getElementById('familyChips');
-      container.innerHTML = '';
-      PHONICS_DATA.forEach((cat, idx) => {
-        const btn = document.createElement('button');
-        btn.className = `chip-btn ${idx === currentCategoryIdx ? 'active' : ''}`;
-        btn.innerText = cat.category;
-        btn.onclick = () => {
-          currentCategoryIdx = idx;
+    function initCurriculum() {
+      const group = CURRICULUM_DATA[currentAgeIdx];
+      const scrollBox = document.getElementById('categoryScroll');
+      scrollBox.innerHTML = '';
+
+      group.categories.forEach((cat, idx) => {
+        const badge = document.createElement('div');
+        badge.className = `cat-badge ${idx === currentCatIdx ? 'active' : ''}`;
+        badge.innerText = cat.name;
+        badge.onclick = () => {
+          currentCatIdx = idx;
           currentWordIdx = 0;
-          initBuilderCategoryTabs();
-          loadPhonicsQuestion();
+          initCurriculum();
         };
-        container.appendChild(btn);
+        scrollBox.appendChild(badge);
       });
+
+      loadWord();
     }
 
-    function loadPhonicsQuestion() {
-      const category = PHONICS_DATA[currentCategoryIdx];
-      currentWordObj = category.words[currentWordIdx];
+    function loadWord() {
+      const group = CURRICULUM_DATA[currentAgeIdx];
+      const category = group.categories[currentCatIdx];
+      currentTargetWordObj = category.words[currentWordIdx];
 
-      document.getElementById('targetEmoji').innerText = currentWordObj.emoji;
-      document.getElementById('targetWordTextHint').innerText = `聽「${currentWordObj.word.toUpperCase()}」發音`;
+      document.getElementById('wordEmoji').innerText = currentTargetWordObj.emoji;
+      document.getElementById('wordTitle').innerText = currentTargetWordObj.word.toUpperCase();
+      document.getElementById('wordMeaning').innerText = currentTargetWordObj.hint;
+      document.getElementById('progressLabel').innerText = `${currentWordIdx + 1} / ${category.words.length}`;
 
-      currentSpellingSlots = new Array(currentWordObj.word.length).fill(null);
+      // 重設拼字卡槽
+      const len = currentTargetWordObj.phonics.length;
+      currentSlots = new Array(len).fill(null);
+
       renderSlots();
-      renderLetterPool();
+      renderLetterTiles();
     }
 
     function renderSlots() {
-      const slotsContainer = document.getElementById('slotsContainer');
-      slotsContainer.innerHTML = '';
-      currentSpellingSlots.forEach((item, idx) => {
+      const container = document.getElementById('slotsRow');
+      container.innerHTML = '';
+      currentSlots.forEach((item, idx) => {
         const slot = document.createElement('div');
-        slot.className = `slot ${item ? 'filled' : ''}`;
+        slot.className = `slot-card ${item ? 'filled' : ''}`;
         slot.innerText = item ? item.letter.toUpperCase() : '';
         slot.onclick = () => removeLetterFromSlot(idx);
-        slotsContainer.appendChild(slot);
+        container.appendChild(slot);
       });
     }
 
-    function renderLetterPool() {
+    function renderLetterTiles() {
       const pool = document.getElementById('letterPool');
       pool.innerHTML = '';
 
-      const correctLetters = currentWordObj.word.split('');
-      const distractors = ['b', 't', 'p', 'm', 's', 'a', 'o', 'd', 'e', 'g'];
-      const extra = distractors.filter(l => !correctLetters.includes(l)).slice(0, 2);
-      const allLetters = [...correctLetters, ...extra].sort(() => Math.random() - 0.5);
+      const letters = [...currentTargetWordObj.phonics];
+      // 隨機混入 2 個干擾字母
+      const distractors = ['s', 'b', 't', 'm', 'c', 'p', 'd', 'f'];
+      const extra = distractors.filter(l => !letters.includes(l)).slice(0, 2);
+      const allTiles = [...letters, ...extra].sort(() => Math.random() - 0.5);
 
-      allLetters.forEach((letter, idx) => {
+      allTiles.forEach(ch => {
         const tile = document.createElement('div');
-        tile.className = 'letter-tile';
-        tile.innerText = letter.toUpperCase();
-        tile.dataset.letter = letter;
-        tile.onclick = () => selectLetterTile(tile, letter);
+        tile.className = 'tile-btn';
+        tile.innerText = ch.toUpperCase();
+        tile.onclick = () => selectLetter(tile, ch);
         pool.appendChild(tile);
       });
     }
 
-    function selectLetterTile(tileElem, letter) {
+    function selectLetter(tileElem, letter) {
       if (tileElem.classList.contains('used')) return;
 
-      const emptyIdx = currentSpellingSlots.indexOf(null);
+      const emptyIdx = currentSlots.indexOf(null);
       if (emptyIdx === -1) return;
 
-      soundLetterClick();
-      speakText(letter, 0.95, 1.25);
+      playClickSound();
+      speakText(letter, 1.0, 1.3);
 
-      currentSpellingSlots[emptyIdx] = {
-        letter: letter,
-        tileElem: tileElem
-      };
-
+      currentSlots[emptyIdx] = { letter: letter, elem: tileElem };
       tileElem.classList.add('used');
-      renderSlotsFromObjects();
+      renderSlotsFast();
+
       checkSpelling();
     }
 
-    function removeLetterFromSlot(slotIdx) {
-      const item = currentSpellingSlots[slotIdx];
+    function removeLetterFromSlot(idx) {
+      const item = currentSlots[idx];
       if (!item) return;
 
-      soundLetterClick();
-      item.tileElem.classList.remove('used');
-      currentSpellingSlots[slotIdx] = null;
-      renderSlotsFromObjects();
+      playClickSound();
+      item.elem.classList.remove('used');
+      currentSlots[idx] = null;
+      renderSlotsFast();
     }
 
-    function renderSlotsFromObjects() {
-      const slotsContainer = document.getElementById('slotsContainer');
-      const slotElems = slotsContainer.children;
-      for (let i = 0; i < currentSpellingSlots.length; i++) {
-        const item = currentSpellingSlots[i];
+    function renderSlotsFast() {
+      const container = document.getElementById('slotsRow');
+      const children = container.children;
+      for (let i = 0; i < currentSlots.length; i++) {
+        const item = currentSlots[i];
         if (item) {
-          slotElems[i].className = 'slot filled';
-          slotElems[i].innerText = item.letter.toUpperCase();
+          children[i].className = 'slot-card filled';
+          children[i].innerText = item.letter.toUpperCase();
         } else {
-          slotElems[i].className = 'slot';
-          slotElems[i].innerText = '';
+          children[i].className = 'slot-card';
+          children[i].innerText = '';
         }
       }
     }
 
-    function resetCurrentWord() {
-      currentSpellingSlots = new Array(currentWordObj.word.length).fill(null);
-      document.querySelectorAll('.letter-tile').forEach(t => t.classList.remove('used'));
+    function resetCurrentSpelling() {
+      currentSlots = new Array(currentTargetWordObj.phonics.length).fill(null);
+      document.querySelectorAll('.tile-btn').forEach(t => t.classList.remove('used'));
       renderSlots();
     }
 
     function checkSpelling() {
-      if (currentSpellingSlots.includes(null)) return;
+      if (currentSlots.includes(null)) return;
 
-      const spelled = currentSpellingSlots.map(it => it.letter).join('');
-      if (spelled.toLowerCase() === currentWordObj.word.toLowerCase()) {
-        soundSuccess();
-        addStars(1);
+      const userWord = currentSlots.map(s => s.letter).join('');
+      if (userWord.toLowerCase() === currentTargetWordObj.word.toLowerCase()) {
+        playSuccessTune();
+        addStar(1);
         setTimeout(() => {
-          showRewardModal(
-            currentWordObj.emoji,
-            `Great Job!`,
-            `你正確拼出了「${currentWordObj.word.toUpperCase()}」(${currentWordObj.hint})！⭐ 獲得 1 顆冒險之星！`
+          showModal(
+            currentTargetWordObj.emoji,
+            `Awesome!`,
+            `你成功拼出了單字「${currentTargetWordObj.word.toUpperCase()}」(${currentTargetWordObj.hint})！⭐ 獲得 1 顆冒險金星！`
           );
-          speakText(`Awesome! ${currentWordObj.word}!`, 0.88);
+          speakText(`Super job! ${currentTargetWordObj.word}!`, 0.85);
         }, 300);
       } else {
-        soundWrong();
-        speakText('Try again!', 1.0);
+        playWrongSound();
+        speakText('Try again! You can do it!', 0.95);
       }
     }
 
-    function nextPhonicsWord() {
-      const category = PHONICS_DATA[currentCategoryIdx];
+    function nextWord() {
+      const group = CURRICULUM_DATA[currentAgeIdx];
+      const category = group.categories[currentCatIdx];
       currentWordIdx = (currentWordIdx + 1) % category.words.length;
-      loadPhonicsQuestion();
-      playTargetWordSound();
+      loadWord();
+      playCurrentWord(false);
     }
 
-    function playTargetWordSound() {
-      if (!currentWordObj) return;
-      const btn = document.getElementById('btnWordSound');
-      if (btn) btn.classList.add('speaking');
-      speakText(currentWordObj.word, 0.85, 1.1, () => {
-        if (btn) btn.classList.remove('speaking');
-      });
+    function playCurrentWord(zoom = false) {
+      if (!currentTargetWordObj) return;
+      if (zoom) {
+        const emoji = document.getElementById('wordEmoji');
+        emoji.style.transform = 'scale(1.2) rotate(-8deg)';
+        setTimeout(() => emoji.style.transform = '', 350);
+      }
+      playClickSound();
+      speakText(currentTargetWordObj.word, 0.85);
     }
 
-    function spellOutPhonics() {
-      if (!currentWordObj) return;
-      const letters = currentWordObj.word.split('');
+    function playPhonicsStepByStep() {
+      if (!currentTargetWordObj) return;
+      const phonics = currentTargetWordObj.phonics;
       let delay = 0;
-      letters.forEach((l, i) => {
+      phonics.forEach((p, idx) => {
         setTimeout(() => {
-          playTone(360 + i * 80, 'sine', 0.12, 0.25);
-          speakText(l, 0.9, 1.25);
+          playBeep(380 + idx * 70, 'sine', 0.12, 0.25);
+          speakText(p, 0.9, 1.25);
         }, delay);
-        delay += 700;
+        delay += 750;
       });
 
       setTimeout(() => {
-        playTone(600, 'triangle', 0.22, 0.25);
-        speakText(currentWordObj.word, 0.85);
+        playBeep(640, 'triangle', 0.2, 0.3);
+        speakText(currentTargetWordObj.word, 0.85);
       }, delay + 250);
     }
 
+    /* 🎙️ 聽我說 (Listen & Repeat 語音跟讀) */
+    let recognition = null;
+    let isListening = false;
+
+    function startMicPractice() {
+      if (!audioUnlocked) unlockAudioSystem();
+      const btn = document.getElementById('btnMicRepeat');
+      const micLabel = document.getElementById('micLabel');
+
+      // 檢查瀏覽器是否支援語音辨識
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (!SpeechRecognition) {
+        // 幼兒友善模式：若無辨識 API，按住鼓勵模仿
+        playClickSound();
+        btn.classList.add('listening');
+        micLabel.innerText = '正在聆聽寶貝的聲音...';
+        setTimeout(() => {
+          btn.classList.remove('listening');
+          micLabel.innerText = '換我說說看 (跟讀)';
+          playSuccessTune();
+          addStar(1);
+          showModal('🎉', 'You Sound Wonderful!', `太棒了！你的發音好清楚、好響亮！⭐ 獎勵 1 顆冒險金星！`);
+          speakText(`Brilliant! Beautiful pronunciation!`, 0.9);
+        }, 2200);
+        return;
+      }
+
+      if (isListening) return;
+
+      try {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        isListening = true;
+        btn.classList.add('listening');
+        micLabel.innerText = '請大聲跟著念... 🎙️';
+
+        recognition.onresult = (event) => {
+          const spoken = event.results[0][0].transcript.toLowerCase();
+          isListening = false;
+          btn.classList.remove('listening');
+          micLabel.innerText = '換我說說看 (跟讀)';
+
+          // 幼兒友善判斷：只要有發出聲音或部分匹配即給予極大鼓勵
+          playSuccessTune();
+          addStar(1);
+          showModal('🌟', 'Great Effort!', `聽到你念了！表現太精彩了！⭐ +1 顆冒險金星！`);
+          speakText(`Wonderful job!`, 0.9);
+        };
+
+        recognition.onerror = () => {
+          isListening = false;
+          btn.classList.remove('listening');
+          micLabel.innerText = '換我說說看 (跟讀)';
+          // 幼兒無挫折回饋
+          showModal('💖', 'You Tried Your Best!', `多練習幾次，你會念得越來越厲害！⭐ 鼓勵獎一顆星星！`);
+          addStar(1);
+        };
+
+        recognition.onend = () => {
+          isListening = false;
+          btn.classList.remove('listening');
+          micLabel.innerText = '換我說說看 (跟讀)';
+        };
+
+        recognition.start();
+      } catch (e) {
+        isListening = false;
+        btn.classList.remove('listening');
+      }
+    }
+
     /* =========================================================
-       5. 模式二：發音魔法鍋
+       6. 模組二：發音拼讀魔法鍋 (Blending)
        ========================================================= */
-    function initBlenderFamilies() {
-      const container = document.getElementById('blenderFamilyTags');
+    function initBlender() {
+      const container = document.getElementById('blenderFamilies');
       container.innerHTML = '';
-      Object.keys(BLENDER_FAMILIES).forEach(key => {
+
+      Object.keys(BLENDER_CATALOG).forEach(key => {
         const btn = document.createElement('button');
-        btn.className = `chip-btn ${key === currentBlenderFamilyKey ? 'active' : ''}`;
+        btn.className = `cat-badge ${key === currentBlenderKey ? 'active' : ''}`;
         btn.innerText = `字族 ${key}`;
         btn.onclick = () => {
-          currentBlenderFamilyKey = key;
-          initBlenderFamilies();
+          currentBlenderKey = key;
+          initBlender();
           loadBlenderStage();
         };
         container.appendChild(btn);
@@ -1392,113 +1665,195 @@
     }
 
     function loadBlenderStage() {
-      const fam = BLENDER_FAMILIES[currentBlenderFamilyKey];
+      const fam = BLENDER_CATALOG[currentBlenderKey];
       currentBlenderItem = fam.items[0];
 
-      document.getElementById('rimeText').innerText = fam.rime;
-      document.getElementById('onsetText').innerText = currentBlenderItem.onset;
-      document.getElementById('blendedWord').innerText = currentBlenderItem.word;
-      document.getElementById('blendedEmoji').innerText = currentBlenderItem.emoji;
+      document.getElementById('blenderOnsetText').innerText = currentBlenderItem.onset;
+      document.getElementById('blenderRimeText').innerText = fam.rime;
+      document.getElementById('potWord').innerText = currentBlenderItem.word;
+      document.getElementById('potEmoji').innerText = currentBlenderItem.emoji;
 
+      // 候選開頭聲母
       const candidates = document.getElementById('onsetCandidates');
       candidates.innerHTML = '';
       fam.items.forEach(item => {
         const tile = document.createElement('div');
-        tile.className = 'letter-tile';
-        tile.style.width = '60px';
-        tile.style.height = '64px';
+        tile.className = 'tile-btn';
+        tile.style.width = '68px';
+        tile.style.height = '74px';
         tile.innerText = item.onset.toUpperCase();
         tile.onclick = () => {
-          soundLetterClick();
+          playClickSound();
           currentBlenderItem = item;
-          document.getElementById('onsetText').innerText = item.onset;
-          document.getElementById('blendedWord').innerText = item.word;
-          document.getElementById('blendedEmoji').innerText = item.emoji;
+          document.getElementById('blenderOnsetText').innerText = item.onset;
+          document.getElementById('potWord').innerText = item.word;
+          document.getElementById('potEmoji').innerText = item.emoji;
           speakText(item.onset, 1.0, 1.3);
         };
         candidates.appendChild(tile);
       });
     }
 
-    function playChunk(type) {
+    function playBlenderPart(type) {
       if (type === 'onset') {
-        playTone(380, 'sine', 0.12, 0.25);
-        speakText(currentBlenderItem.onset, 1.0, 1.2);
+        playBeep(400, 'sine', 0.15, 0.25);
+        speakText(currentBlenderItem.onset, 1.0, 1.3);
       } else {
-        playTone(480, 'sine', 0.12, 0.25);
-        speakText(BLENDER_FAMILIES[currentBlenderFamilyKey].rime, 0.9, 1.1);
+        playBeep(500, 'sine', 0.15, 0.25);
+        speakText(BLENDER_CATALOG[currentBlenderKey].rime, 0.9, 1.1);
       }
     }
 
-    function playBlendedSound() {
-      soundCheer();
+    function blendAndCelebrate() {
+      playCheerTune(true);
+      addStar(1);
       speakText(`${currentBlenderItem.word}!`, 0.85);
-      addStars(1);
     }
 
     /* =========================================================
-       6. 模式三：Toby 互動英語對話
+       7. 模組三：Toby 夥伴情境對話 (Dialogue)
        ========================================================= */
-    function loadTalkScenario(idx) {
-      currentTalkIdx = idx % CONVERSATION_SCENARIOS.length;
-      const scenario = CONVERSATION_SCENARIOS[currentTalkIdx];
+    function loadDialogue(idx) {
+      const group = CURRICULUM_DATA[currentAgeIdx];
+      currentDialogueIdx = idx % group.dialogues.length;
+      const scenario = group.dialogues[currentDialogueIdx];
 
-      document.getElementById('tobySpeechEn').innerText = `"${scenario.tobyEn}"`;
-      document.getElementById('tobySpeechZh').innerText = `「${scenario.tobyZh}」`;
+      document.getElementById('tobyLineEn').innerText = `"${scenario.tobyEn}"`;
+      document.getElementById('tobyLineZh').innerText = `「${scenario.tobyZh}」`;
 
-      const grid = document.getElementById('talkOptionsGrid');
+      const grid = document.getElementById('dialogueOptionsGrid');
       grid.innerHTML = '';
 
       scenario.options.forEach(opt => {
         const btn = document.createElement('div');
-        btn.className = 'talk-option';
+        btn.className = 'option-card-btn';
         btn.innerHTML = `
           <span>${opt.text}</span>
-          <span style="font-size: 1.2rem;">💬</span>
+          <span style="font-size: 1.4rem;">💬</span>
         `;
-        btn.onclick = () => chooseTalkOption(opt, btn);
+        btn.onclick = () => selectDialogueOption(opt, btn);
         grid.appendChild(btn);
       });
     }
 
-    function playTobyVoice() {
-      const scenario = CONVERSATION_SCENARIOS[currentTalkIdx];
+    function speakTobyLine() {
+      const group = CURRICULUM_DATA[currentAgeIdx];
+      const scenario = group.dialogues[currentDialogueIdx];
       speakText(scenario.tobyEn, 0.88, 1.05);
     }
 
-    function chooseTalkOption(option, btnElem) {
-      soundLetterClick();
-      btnElem.classList.add('correct');
+    function selectDialogueOption(opt, btn) {
+      playClickSound();
+      btn.classList.add('selected');
 
-      speakText(option.text, 0.9, 1.0, () => {
+      // 朗讀孩子的選項
+      speakText(opt.text, 0.9, 1.0, () => {
         setTimeout(() => {
-          document.getElementById('tobySpeechEn').innerText = `"${option.reply}"`;
-          document.getElementById('tobySpeechZh').innerText = `「${option.replyZh}」`;
-          speakText(option.reply, 0.88, 1.1);
-          soundSuccess();
-          addStars(1);
+          document.getElementById('tobyLineEn').innerText = `"${opt.reply}"`;
+          document.getElementById('tobyLineZh').innerText = `「${opt.replyZh}」`;
+          speakText(opt.reply, 0.88, 1.1);
+          playSuccessTune();
+          addStar(1);
 
           setTimeout(() => {
-            loadTalkScenario(currentTalkIdx + 1);
-            playTobyVoice();
-          }, 3500);
+            loadDialogue(currentDialogueIdx + 1);
+            speakTobyLine();
+          }, 4000);
         }, 600);
       });
     }
 
-    /* =========================================================
-       7. 獎勵視窗 Modal
-       ========================================================= */
-    function showRewardModal(emoji, title, desc) {
-      document.querySelector('.modal-emoji').innerText = emoji;
-      document.querySelector('.modal-title').innerText = title;
-      document.getElementById('rewardDesc').innerText = desc;
-      document.getElementById('rewardModal').style.display = 'flex';
+    function startTobyMic() {
+      if (!audioUnlocked) unlockAudioSystem();
+      playClickSound();
+      speakText('I am listening! Say something in English!', 0.9, 1.1, () => {
+        setTimeout(() => {
+          playSuccessTune();
+          addStar(1);
+          showModal('🎉', 'Toby Loves Talking with You!', '太棒了！Toby 聽見了你的聲音，好開心！⭐ 獎勵一顆星星！');
+        }, 1500);
+      });
     }
 
-    function closeModalAndContinue() {
-      document.getElementById('rewardModal').style.display = 'none';
-      nextPhonicsWord();
+    /* =========================================================
+       8. 慶祝彈窗與彩花粒子 (Confetti)
+       ========================================================= */
+    function showModal(emoji, title, desc) {
+      document.querySelector('.modal-emoji').innerText = emoji;
+      document.querySelector('.modal-headline').innerText = title;
+      document.getElementById('modalMessage').innerText = desc;
+      document.getElementById('celebrationModal').style.display = 'flex';
+      launchConfetti();
+    }
+
+    function closeModal() {
+      document.getElementById('celebrationModal').style.display = 'none';
+      nextWord();
+    }
+
+    // 簡易實用 Confetti 引擎
+    let confettiCtx = null;
+    let particles = [];
+
+    function setupConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      confettiCtx = canvas.getContext('2d');
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+    }
+
+    function launchConfetti() {
+      particles = [];
+      const colors = ['#FF5A5F', '#00A699', '#FFB400', '#8A4FFF', '#2E86DE', '#2ECC71'];
+      for (let i = 0; i < 65; i++) {
+        particles.push({
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2,
+          vx: (Math.random() - 0.5) * 16,
+          vy: (Math.random() - 0.7) * 16,
+          size: Math.random() * 8 + 6,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 10,
+          opacity: 1
+        });
+      }
+      renderConfetti();
+    }
+
+    function renderConfetti() {
+      if (particles.length === 0) return;
+      confettiCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.35; // 重力
+        p.rotation += p.vRot;
+        p.opacity -= 0.016;
+
+        if (p.opacity <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        confettiCtx.save();
+        confettiCtx.globalAlpha = p.opacity;
+        confettiCtx.translate(p.x, p.y);
+        confettiCtx.rotate((p.rotation * Math.PI) / 180);
+        confettiCtx.fillStyle = p.color;
+        confettiCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        confettiCtx.restore();
+      }
+
+      if (particles.length > 0) {
+        requestAnimationFrame(renderConfetti);
+      }
     }
   </script>
 </body>
