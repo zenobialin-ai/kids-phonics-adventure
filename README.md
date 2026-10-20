@@ -45,7 +45,7 @@ flowchart TD
 ## ✨ 核心互動亮點
 
 1. 🔤 **發音探索與拼字（Phonics Playground）**：
-   - 支援「標準整詞發音」、「慢速音素拆解發音（/k/ - /æ/ - /t/）」與積木卡槽回饋。
+   - 支援「標準整詞發音」、「慢速拆解」與積木卡槽回饋。慢速拆解會先念一次整個單字，接著依序亮起每個音素區塊，最後再慢速念一次整個單字。（瀏覽器語音只會念字母名，單獨的音素目前以提示音代替；真人音素錄音會於 #2 加入。）
 2. 🎙️ **「換我說說看」跟讀模組（Listen & Repeat）**：
    - 點擊啟動麥克風，結合瀏覽器語音辨識與幼兒容錯評估，給予大大的自信與讚美！
 3. 🥣 **自然發音拼讀魔法鍋（Word Blender）**：
@@ -69,8 +69,10 @@ flowchart TD
 git clone https://github.com/zenobialin-ai/kids-phonics-adventure.git
 cd kids-phonics-adventure
 
-# 方式 A：雙擊點擊「點我啟動遊戲.bat」或「start.bat」
-# 方式 B：使用 Node.js 極速啟動
+# 以下兩種方式都需先安裝 Node.js
+
+# 方式 A：Windows 雙擊 start.bat
+# 方式 B：在命令列執行
 node server.js
 ```
 
