@@ -762,6 +762,13 @@
     }
 
     /* 動畫 */
+    /* 慢速拆解：目前念到的音素區塊 */
+    .phon-chunk { display: inline-block; transition: transform .15s; }
+    .phon-chunk.active { color: var(--primary); transform: scale(1.25); }
+    /* 魔法鍋首音／韻尾點擊時的短暫脈動 */
+    .part-pulse { display: inline-block; animation: partPulse .4s ease; }
+    @keyframes partPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+
     @keyframes bounce {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-10px); }
@@ -922,7 +929,7 @@
       <div class="card-box">
         <div class="blender-header">
           <h2 style="font-size: 2rem; color: #334155; margin-bottom: 6px;">🥣 自然發音拼讀魔法鍋 (Blending)</h2>
-          <p style="color: #64748B; font-size: 1.1rem;">點擊左側「首音」與右側「韻尾」聽音素，再點金色魔法鍋將聲音合成一個完整單字！</p>
+          <p style="color: #64748B; font-size: 1.1rem;">點「首音」看開頭字母、點「韻尾」聽押韻的單字，再點金色魔法鍋聽完整單字！</p>
         </div>
 
         <!-- 家族標籤 -->
@@ -1020,6 +1027,10 @@
     let audioUnlocked = false;
     let preferredVoice = null;
     let currentAudioFallback = null;
+    // 慢速拆解的狀態：token 讓過期的計時器自動失效，segActive 表示標題目前被換成音素區塊
+    let segToken = 0;
+    let segTimers = [];
+    let segActive = false;
 
     function getAudioCtx() {
       if (!audioCtx) {
@@ -1057,13 +1068,19 @@
       if (!('speechSynthesis' in window)) return;
       const voices = window.speechSynthesis.getVoices();
       if (voices.length > 0) {
-        preferredVoice = voices.find(v => v.lang === 'en-US' && (v.name.includes('Natural') || v.name.includes('Samantha') || v.name.includes('Zira') || v.name.includes('Google')))
-          || voices.find(v => v.lang.startsWith('en'))
-          || voices[0];
+        // 語言代碼統一成小寫並把 en_US 轉成 en-US 再比對
+        const lang = v => (v.lang || '').replace('_', '-').toLowerCase();
+        const nice = n => n.includes('Natural') || n.includes('Samantha') || n.includes('Zira') || n.includes('Google');
+        // 找不到英文語音時維持 null（用引擎預設），不要退而求其次選 voices[0]（可能是中文語音）
+        preferredVoice = voices.find(v => lang(v) === 'en-us' && nice(v.name || ''))
+          || voices.find(v => lang(v) === 'en-us')
+          || voices.find(v => /^en([-_]|$)/i.test(v.lang || ''))
+          || null;
       }
     }
     if ('speechSynthesis' in window) {
       window.speechSynthesis.onvoiceschanged = loadVoices;
+      loadVoices();
     }
 
     // 播放合成卡通樂音
@@ -1101,26 +1118,41 @@
       });
     }
 
+    // 送進語音引擎前先去掉 emoji 等符號，避免被唸成「臉部表情」之類的描述
+    function stripForSpeech(text) {
+      return String(text ?? '').replace(/[^\p{L}\p{N}\s.,!?'’\-]/gu, '').replace(/\s+/g, ' ').trim();
+    }
+
     // 發音播放 (支援本地語音合成 + 線上純音訊雙保險)
+    // pitch 參數保留以相容舊呼叫，實際一律 1.0：音調拉高聽起來不自然，對發音還不穩的孩子比較不清楚
     function speakText(text, rate = 0.85, pitch = 1.1, onEnd = null) {
       if (!audioUnlocked) unlockAudioSystem();
 
-      const cleanText = text.replace(/[^a-zA-Z\s]/g, '').trim();
+      const speechText = stripForSpeech(text);
+      if (!speechText) {
+        if (typeof onEnd === 'function') setTimeout(onEnd, 0);
+        return;
+      }
+      const cleanText = String(text ?? '').replace(/[^a-zA-Z\s]/g, '').trim();
 
       // 優先使用 Web Speech API
       if ('speechSynthesis' in window) {
         try {
           window.speechSynthesis.cancel();
-          const utterance = new SpeechSynthesisUtterance(text);
+          const utterance = new SpeechSynthesisUtterance(speechText);
           utterance.lang = 'en-US';
           utterance.rate = rate;
-          utterance.pitch = pitch;
+          utterance.pitch = 1.0;
           if (preferredVoice) utterance.voice = preferredVoice;
 
           let hasSpoken = false;
           utterance.onstart = () => { hasSpoken = true; };
           utterance.onend = () => { if (onEnd) onEnd(); };
-          utterance.onerror = () => { playFallbackAudio(cleanText, onEnd); };
+          utterance.onerror = (e) => {
+            // 我們自己呼叫 cancel() 會讓上一句觸發 interrupted/canceled，這不是失敗，不要補播線上音訊
+            if (e && (e.error === 'interrupted' || e.error === 'canceled')) return;
+            playFallbackAudio(cleanText, onEnd);
+          };
 
           window.speechSynthesis.speak(utterance);
 
@@ -1375,6 +1407,7 @@
     }
 
     function switchModule(mod) {
+      cancelSegmentation();
       document.querySelectorAll('.module-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
 
@@ -1414,6 +1447,7 @@
     }
 
     function loadWord() {
+      cancelSegmentation();
       const group = CURRICULUM_DATA[currentAgeIdx];
       const category = group.categories[currentCatIdx];
       currentTargetWordObj = category.words[currentWordIdx];
@@ -1469,7 +1503,7 @@
       if (emptyIdx === -1) return;
 
       playClickSound();
-      speakText(letter, 1.0, 1.3);
+      playPhonemeSound(letter, 0, { silent: true });
 
       currentSlots[emptyIdx] = { letter: letter, elem: tileElem };
       tileElem.classList.add('used');
@@ -1549,22 +1583,67 @@
       speakText(currentTargetWordObj.word, 0.85);
     }
 
+    // 單音：瀏覽器語音只會念字母名（c → "see"），會教錯音，所以先不念；
+    // 之後有真人錄音（#2 的 A 方案）放進 PHONEME_AUDIO，這裡就會改播錄音。
+    const PHONEME_AUDIO = {};   // 例：{ c: 'audio/phonemes/k.mp3' }，目前是空的
+    function playPhonemeSound(p, idx = 0, opts = {}) {
+      if (PHONEME_AUDIO[p]) {
+        try { const a = new Audio(PHONEME_AUDIO[p]); a.play().catch(() => {}); } catch (e) {}
+        return;
+      }
+      if (!opts.silent) playBeep(380 + idx * 70, 'sine', 0.12, 0.25);
+    }
+
+    // 取消慢速拆解：讓所有排程失效，若標題正被換成音素區塊就還原
+    function cancelSegmentation() {
+      segToken++;
+      segTimers.forEach(clearTimeout);
+      segTimers = [];
+      if (segActive) {
+        segActive = false;
+        if (currentTargetWordObj) {
+          document.getElementById('wordTitle').innerText = currentTargetWordObj.word.toUpperCase();
+        }
+      }
+    }
+
+    // 慢速拆解：先聽整個字 → 看每個音素依序亮起 → 再慢速聽一次整個字
     function playPhonicsStepByStep() {
       if (!currentTargetWordObj) return;
-      const phonics = currentTargetWordObj.phonics;
-      let delay = 0;
+      cancelSegmentation();
+      const st = ++segToken;
+      const wordObj = currentTargetWordObj;
+      const phonics = wordObj.phonics;
+      const title = document.getElementById('wordTitle');
+      const later = (fn, ms) => {
+        segTimers.push(setTimeout(() => { if (st !== segToken) return; fn(); }, ms));
+      };
+
+      // 必須在點擊事件內同步呼叫（iOS 的限制）
+      speakText(wordObj.word, 0.85);
+
       phonics.forEach((p, idx) => {
-        setTimeout(() => {
-          playBeep(380 + idx * 70, 'sine', 0.12, 0.25);
-          speakText(p, 0.9, 1.25);
-        }, delay);
-        delay += 750;
+        later(() => {
+          if (idx === 0) {
+            title.innerText = '';
+            phonics.forEach(c => {
+              const span = document.createElement('span');
+              span.className = 'phon-chunk';
+              span.textContent = c;
+              title.appendChild(span);
+            });
+            segActive = true;
+          }
+          title.querySelectorAll('.phon-chunk').forEach((el, i) => el.classList.toggle('active', i === idx));
+          playPhonemeSound(p, idx);
+        }, 1200 + idx * 750);
       });
 
-      setTimeout(() => {
-        playBeep(640, 'triangle', 0.2, 0.3);
-        speakText(currentTargetWordObj.word, 0.85);
-      }, delay + 250);
+      later(() => {
+        segActive = false;
+        title.innerText = currentTargetWordObj.word.toUpperCase();
+        speakText(wordObj.word, 0.7);
+      }, 1200 + phonics.length * 750);
     }
 
     /* 🎙️ 聽我說 (Listen & Repeat 語音跟讀) */
@@ -1688,19 +1767,33 @@
           document.getElementById('blenderOnsetText').innerText = item.onset;
           document.getElementById('potWord').innerText = item.word;
           document.getElementById('potEmoji').innerText = item.emoji;
-          speakText(item.onset, 1.0, 1.3);
+          playPhonemeSound(item.onset, 0, { silent: true });
         };
         candidates.appendChild(tile);
       });
     }
 
+    function pulseElem(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove('part-pulse');
+      void el.offsetWidth;   // 強制 reflow，連點時動畫才會重播
+      el.classList.add('part-pulse');
+      setTimeout(() => el.classList.remove('part-pulse'), 450);
+    }
+
     function playBlenderPart(type) {
       if (type === 'onset') {
-        playBeep(400, 'sine', 0.15, 0.25);
-        speakText(currentBlenderItem.onset, 1.0, 1.3);
+        // 首音單獨念會變成字母名，所以只用提示音＋動畫
+        playPhonemeSound(currentBlenderItem.onset, 0);
+        pulseElem('blenderOnsetText');
       } else {
-        playBeep(500, 'sine', 0.15, 0.25);
-        speakText(BLENDER_CATALOG[currentBlenderKey].rime, 0.9, 1.1);
+        // 韻尾（og、un、ig）不是單字，改念同字族的前三個單字
+        pulseElem('blenderRimeText');
+        const fam = BLENDER_CATALOG[currentBlenderKey];
+        const cur = currentBlenderItem || fam.items[0];
+        const words = [cur, ...fam.items.filter(i => i !== cur)].slice(0, 3).map(i => i.word).join(', ');
+        speakText(words, 0.85);   // 例：目前 cat → 'cat, bat, hat'
       }
     }
 
