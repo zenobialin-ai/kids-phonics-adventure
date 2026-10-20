@@ -688,6 +688,14 @@
       color: #166534;
     }
 
+    .mic-feedback {
+      min-height: 1.6em;
+      margin-top: 10px;
+      text-align: center;
+      font-weight: 700;
+      color: #475569;
+    }
+
     /* 麥克風對話提示按鈕 */
     .voice-reply-section {
       width: 100%;
@@ -904,6 +912,7 @@
             <span id="micLabel">換我說說看 (跟讀)</span>
           </button>
         </div>
+        <div id="micFeedback" class="mic-feedback" aria-live="polite"></div>
 
         <!-- 拼字卡槽與積木 -->
         <div class="spelling-board">
@@ -993,11 +1002,12 @@
           <!-- 麥克風語音互動提示條 -->
           <div class="voice-reply-section">
             <span style="font-size: 1.1rem; font-weight: 700; color: #92400E;">🎙️ 想直接跟 Toby 說話嗎？</span>
-            <button class="action-btn btn-mic-repeat" style="padding: 8px 18px;" onclick="startTobyMic()">
+            <button class="action-btn btn-mic-repeat" id="btnTobyMic" style="padding: 8px 18px;" onclick="startTobyMic()">
               <span>🎤</span>
-              <span>用語音回答</span>
+              <span id="tobyMicLabel">用語音回答</span>
             </button>
           </div>
+          <div id="tobyMicFeedback" class="mic-feedback" aria-live="polite"></div>
 
           <!-- 回答選項卡片 -->
           <div class="dialogue-options-layout" id="dialogueOptionsGrid"></div>
@@ -1126,6 +1136,7 @@
     // 發音播放 (支援本地語音合成 + 線上純音訊雙保險)
     // pitch 參數保留以相容舊呼叫，實際一律 1.0：音調拉高聽起來不自然，對發音還不穩的孩子比較不清楚
     function speakText(text, rate = 0.85, pitch = 1.1, onEnd = null) {
+      if (micSession) stopMic();   // 要發音就先結束聆聽，避免辨識器聽到自己
       if (!audioUnlocked) unlockAudioSystem();
 
       const speechText = stripForSpeech(text);
@@ -1138,6 +1149,7 @@
       // 優先使用 Web Speech API
       if ('speechSynthesis' in window) {
         try {
+          const gen = ++speechGen;
           window.speechSynthesis.cancel();
           const utterance = new SpeechSynthesisUtterance(speechText);
           utterance.lang = 'en-US';
@@ -1158,6 +1170,7 @@
 
           // 防止 file:// 協定下可能暫停的防卡機制
           setTimeout(() => {
+            if (gen !== speechGen) return;
             if (!hasSpoken && window.speechSynthesis.speaking === false) {
               playFallbackAudio(cleanText, onEnd);
             }
@@ -1172,6 +1185,7 @@
     }
 
     function playFallbackAudio(text, onEnd) {
+      if (micSession) return;
       try {
         if (currentAudioFallback) {
           currentAudioFallback.pause();
@@ -1394,6 +1408,7 @@
     }
 
     function switchAgeGroup(idx) {
+      stopMic();
       currentAgeIdx = idx;
       currentCatIdx = 0;
       currentWordIdx = 0;
@@ -1408,6 +1423,8 @@
 
     function switchModule(mod) {
       cancelSegmentation();
+      stopMic();
+      ++dialogueToken;
       document.querySelectorAll('.module-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
 
@@ -1420,6 +1437,8 @@
       } else if (mod === 'talk') {
         document.querySelectorAll('.module-tab')[2].classList.add('active');
         document.getElementById('panel-talk').classList.add('active');
+        // 離開分頁時被取消的對話鏈可能留下舊回覆／選取狀態，回來時重畫
+        loadDialogue(currentDialogueIdx);
       }
     }
 
@@ -1448,6 +1467,9 @@
 
     function loadWord() {
       cancelSegmentation();
+      stopMic();
+      micAttempts = { key: '', count: 0 };
+      setMicFeedback('word', '');
       const group = CURRICULUM_DATA[currentAgeIdx];
       const category = group.categories[currentCatIdx];
       currentTargetWordObj = category.words[currentWordIdx];
@@ -1587,6 +1609,7 @@
     // 之後有真人錄音（#2 的 A 方案）放進 PHONEME_AUDIO，這裡就會改播錄音。
     const PHONEME_AUDIO = {};   // 例：{ c: 'audio/phonemes/k.mp3' }，目前是空的
     function playPhonemeSound(p, idx = 0, opts = {}) {
+      if (micSession) return;
       if (PHONEME_AUDIO[p]) {
         try { const a = new Audio(PHONEME_AUDIO[p]); a.play().catch(() => {}); } catch (e) {}
         return;
@@ -1646,79 +1669,293 @@
       }, 1200 + phonics.length * 750);
     }
 
-    /* 🎙️ 聽我說 (Listen & Repeat 語音跟讀) */
-    let recognition = null;
-    let isListening = false;
+    /* 🎙️ 聽我說 (Listen & Repeat 語音跟讀 / Toby 語音回答)：分齡寬容評分 */
+    // 索引 = currentAgeIdx：4–5 歲有出聲就過；6–7 歲比首音＋韻尾；8–9 歲要念出整個單字／整句話
+    const MIC_TIERS = ['any', 'onsetRime', 'word'];
 
-    function startMicPractice() {
-      if (!audioUnlocked) unlockAudioSystem();
-      const btn = document.getElementById('btnMicRepeat');
-      const micLabel = document.getElementById('micLabel');
+    // 語音辨識結果的簡易斷詞（小寫、縮寫展開、去標點）
+    function micTokens(s) {
+      let t = String(s ?? '').toLowerCase().replace(/’/g, "'").replace(/[^a-z0-9']/g, ' ');
+      const contractions = [
+        [/\bi'm\b/g, 'i am'], [/\bit's\b/g, 'it is'], [/\bthat's\b/g, 'that is'], [/\blet's\b/g, 'let us'],
+        [/\bdon't\b/g, 'do not'], [/\bcan't\b/g, 'can not'], [/\bi'll\b/g, 'i will'], [/\byou're\b/g, 'you are']
+      ];
+      contractions.forEach(([re, to]) => { t = t.replace(re, to); });
+      return t.replace(/'/g, '').split(/\s+/).filter(Boolean);
+    }
 
-      // 檢查瀏覽器是否支援語音辨識
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    // 單複數寬鬆比對（cat / cats、box / boxes）
+    function sameWordLoose(a, b) {
+      return a === b || a + 's' === b || b + 's' === a || a + 'es' === b || b + 'es' === a;
+    }
 
-      if (!SpeechRecognition) {
-        // 幼兒友善模式：若無辨識 API，按住鼓勵模仿
-        playClickSound();
-        btn.classList.add('listening');
-        micLabel.innerText = '正在聆聽寶貝的聲音...';
-        setTimeout(() => {
-          btn.classList.remove('listening');
-          micLabel.innerText = '換我說說看 (跟讀)';
+    // 所有辨識候選（每個結果的每個備選）合併後的斷詞
+    function micAllTokens(transcripts) {
+      return (transcripts || []).flatMap(micTokens);
+    }
+
+    // 6–7 歲：首音可有同音變體，尾音清濁（t/d、g/k、p/b）幼兒常不穩、辨識也常混，所以放寬
+    const ONSET_EQ = { c: ['c', 'k'], k: ['k', 'c'], f: ['f', 'ph'] };
+    const CODA_EQ = {
+      x: ['x', 'ks', 'cks', 'cs'], ck: ['ck', 'k', 'c'], t: ['t', 'd'], d: ['d', 't'],
+      g: ['g', 'k'], k: ['k', 'g'], p: ['p', 'b'], b: ['b', 'p'], s: ['s', 'ss', 'z']
+    };
+    const reEscape = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    // 6–7 歲比「首音＋韻尾（母音＋尾音）」，母音要對
+    function rimeMatches(wordObj, token) {
+      const ph = wordObj.phonics;
+      const first = ph[0], last = ph[ph.length - 1];
+      const onsets = (ONSET_EQ[first] || [first]).map(reEscape).join('|');
+      const codas = (CODA_EQ[last] || [last]).map(reEscape).join('|');
+      const mid = reEscape(ph.slice(1, -1).join(''));
+      const re = new RegExp(`^(?:${onsets})${mid}(?:${codas})$`);
+      const cands = [token];
+      if (token.endsWith('s') && !wordObj.word.endsWith('s')) cands.push(token.slice(0, -1));
+      return cands.some(c => re.test(c));
+    }
+
+    function judgeWordAttempt(tier, wordObj, transcripts, speechDetected) {
+      const tokens = micAllTokens(transcripts);
+      const word = wordObj.word.toLowerCase();
+      const exact = tokens.some(t => sameWordLoose(t, word));
+      if (tier === 'any') return { pass: tokens.length > 0 || !!speechDetected, exact };
+      if (tier === 'onsetRime') return { pass: exact || tokens.some(t => rimeMatches(wordObj, t)), exact };
+      return { pass: exact, exact };
+    }
+
+    const MIC_TOBY_STOP = new Set(['i', 'am', 'is', 'a', 'an', 'the', 'my', 'it', 'was', 'but', 'with', 'to', 'you', 'do', 'like', 'love', 'bit', 'so', 'and', 'name', 'are', 'what', 'your']);
+
+    function judgeTobyAttempt(tier, options, transcripts, speechDetected) {
+      const tokens = micAllTokens(transcripts);
+      const maxLen = Math.max(0, ...(transcripts || []).map(a => micTokens(a).length));
+      const scored = options.map((o, i) => {
+        const content = micTokens(stripForSpeech(o.text)).filter(w => !MIC_TOBY_STOP.has(w));
+        const hits = content.filter(c => tokens.some(t => sameWordLoose(t, c))).length;
+        return { o, i, content, hits };
+      });
+      let best = scored[0];
+      scored.forEach(s => { if (s.hits > best.hits) best = s; });
+      const pickOption = () => ({ pass: true, option: best.o, optionIndex: best.i, generic: false });
+      const generic = { pass: true, option: null, optionIndex: -1, generic: true };
+      const fail = { pass: false, option: null, optionIndex: -1, generic: false };
+
+      if (tier === 'any') {
+        if (!(tokens.length > 0 || speechDetected)) return fail;
+        if (best.content.length > 0 && best.hits === best.content.length) return pickOption();
+        return generic;
+      }
+      if (tier === 'onsetRime') {
+        if (best.hits >= 1) return pickOption();
+        return tokens.length >= 1 ? generic : fail;
+      }
+      if (best.hits >= 1 && maxLen >= 3) return pickOption();
+      return maxLen >= 3 ? generic : fail;
+    }
+
+    /* ---- 麥克風 session 控制器 ---- */
+    let micSession = null;   // { id, kind, rec, tier, target, options, dialogueIdx, transcripts, speech, error, timers, done }
+    let micSeq = 0;
+    let micAttempts = { key: '', count: 0 };
+    let speechGen = 0;       // speakText 的世代，讓過期的 350ms 備援計時器失效
+    let dialogueToken = 0;   // Toby 對話鏈的 token，讓過期的 callback / 計時器失效
+
+    const MIC_MSG = {
+      noApi: '這個瀏覽器沒辦法聽聲音，請用電腦版 Chrome/Edge，或 iPhone/iPad 的 Safari 打開',
+      notAllowed: '需要允許使用麥克風才能聽你說話喔（請家長按允許）',
+      serviceNotAllowed: '這台裝置的語音辨識沒有開啟（iPhone/iPad 請到設定開啟「聽寫」）',
+      audioCapture: '找不到麥克風，請確認有接上麥克風',
+      network: '語音辨識需要網路，請確認有連上網路',
+      cantOpen: '麥克風暫時打不開，請再按一次',
+      silent: '沒聽到聲音喔，靠近麥克風再大聲說一次！',
+      wordMiss: '差一點點！再聽一次，跟著念～',
+      tobySentence: '試著用一整句話回答 Toby 喔！',
+      tobyMiss: 'Toby 沒聽清楚，再說一次好嗎？',
+      effort: '你好努力！送你一顆努力星，我們再聽一次～',
+      tobyGeneric: 'Toby 聽見你的回答了，好開心！'
+    };
+
+    function setMicFeedback(kind, text) {
+      const el = document.getElementById(kind === 'toby' ? 'tobyMicFeedback' : 'micFeedback');
+      if (el) el.textContent = text;
+    }
+
+    // state: 'idle' | 'preparing' | 'listening'；idle 時兩個按鈕一起還原
+    function setMicUI(kind, state) {
+      const cfg = {
+        word: { btn: 'btnMicRepeat', label: 'micLabel', idle: '換我說說看 (跟讀)', live: '請大聲跟著念... 🎙️' },
+        toby: { btn: 'btnTobyMic', label: 'tobyMicLabel', idle: '用語音回答', live: 'Toby 在聽... 🎤' }
+      };
+      (state === 'idle' ? ['word', 'toby'] : [kind]).forEach(k => {
+        const c = cfg[k];
+        const btn = document.getElementById(c.btn);
+        const label = document.getElementById(c.label);
+        if (btn) btn.classList.toggle('listening', state !== 'idle');
+        if (label) label.innerText = state === 'idle' ? c.idle : (state === 'preparing' ? '準備中…' : c.live);
+      });
+    }
+
+    function releaseRec(session) {
+      const rec = session.rec;
+      if (!rec) return;
+      rec.onstart = rec.onaudiostart = rec.onspeechstart = rec.onresult = rec.onerror = rec.onend = null;
+      try { rec.abort(); } catch (e) {}
+    }
+
+    // 主動中止（換字、換年齡、換分頁、要發音）：不給回饋、不給星
+    function stopMic() {
+      const session = micSession;
+      if (!session) return;
+      micSession = null;
+      session.done = true;
+      session.timers.forEach(clearTimeout);
+      releaseRec(session);
+      setMicUI(session.kind, 'idle');
+    }
+
+    function startMicPractice() { startMic('word'); }
+    function startTobyMic() { startMic('toby'); }
+
+    function startMic(kind) {
+      // 必須在點擊事件內同步完成（iOS 要求使用者手勢），中間不可 await / setTimeout
+      if (micSession) return;
+      const modal = document.getElementById('celebrationModal');
+      if (modal && modal.style.display === 'flex') return;
+
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { setMicFeedback(kind, MIC_MSG.noApi); return; }
+
+      // 先讓喇叭安靜，避免辨識器聽到自己的發音
+      cancelSegmentation();
+      speechGen++;
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+      if (currentAudioFallback) {
+        try { currentAudioFallback.pause(); } catch (e) {}
+        currentAudioFallback = null;
+      }
+      if (kind === 'toby') {
+        ++dialogueToken;
+        document.querySelectorAll('#dialogueOptionsGrid > *').forEach(c => c.classList.remove('selected'));
+      }
+      setMicFeedback(kind, '');
+      setMicUI(kind, 'preparing');
+
+      const session = {
+        id: ++micSeq, kind, rec: null, tier: MIC_TIERS[currentAgeIdx],
+        target: null, options: null, dialogueIdx: currentDialogueIdx,
+        transcripts: [], speech: false, error: null, timers: [], done: false
+      };
+      if (kind === 'word') {
+        session.target = currentTargetWordObj;
+      } else {
+        session.target = CURRICULUM_DATA[currentAgeIdx].dialogues[currentDialogueIdx];
+        session.options = session.target.options;
+      }
+
+      let rec;
+      try {
+        rec = new SR();
+        rec.lang = 'en-US';
+        rec.interimResults = false;
+        rec.continuous = false;
+        rec.maxAlternatives = 5;
+      } catch (e) {
+        setMicUI(kind, 'idle');
+        setMicFeedback(kind, MIC_MSG.cantOpen);
+        return;
+      }
+      session.rec = rec;
+      micSession = session;
+
+      rec.onaudiostart = () => { if (micSession !== session) return; setMicUI(kind, 'listening'); };
+      rec.onspeechstart = () => { if (micSession !== session) return; session.speech = true; };
+      rec.onresult = (event) => {
+        if (micSession !== session) return;
+        for (let i = 0; i < event.results.length; i++) {
+          for (let j = 0; j < event.results[i].length; j++) {
+            session.transcripts.push(event.results[i][j].transcript);
+          }
+        }
+      };
+      rec.onerror = (e) => { if (micSession !== session) return; session.error = e && e.error; };
+      rec.onend = () => { if (micSession !== session) return; finishMic(session); };
+
+      session.timers.push(setTimeout(() => { if (micSession !== session) return; try { rec.stop(); } catch (e) {} }, 8000));
+      session.timers.push(setTimeout(() => finishMic(session), 10000));
+
+      try {
+        rec.start();
+      } catch (e) {
+        session.error = 'start-failed';
+        finishMic(session);
+      }
+    }
+
+    function finishMic(session) {
+      if (micSession !== session || session.done) return;
+      session.done = true;
+      micSession = null;
+      session.timers.forEach(clearTimeout);
+      releaseRec(session);
+      setMicUI(session.kind, 'idle');
+
+      const kind = session.kind;
+      const err = session.error;
+      if (err === 'no-speech') session.speech = false;
+      const tokens = micAllTokens(session.transcripts);
+
+      if (err === 'aborted') return;
+      const errMsg = {
+        'not-allowed': MIC_MSG.notAllowed,
+        'service-not-allowed': MIC_MSG.serviceNotAllowed,
+        'audio-capture': MIC_MSG.audioCapture,
+        'network': MIC_MSG.network
+      }[err];
+      if (errMsg) { setMicFeedback(kind, errMsg); return; }
+      if (err && err !== 'no-speech' && err !== 'no-match') { setMicFeedback(kind, MIC_MSG.cantOpen); return; }
+
+      const key = kind === 'word' ? `word:${session.target.word}` : `toby:${currentAgeIdx}:${session.dialogueIdx}`;
+      const verdict = kind === 'word'
+        ? judgeWordAttempt(session.tier, session.target, session.transcripts, session.speech)
+        : judgeTobyAttempt(session.tier, session.options, session.transcripts, session.speech);
+
+      if (verdict.pass) {
+        micAttempts = { key: '', count: 0 };
+        if (kind === 'word') {
           playSuccessTune();
           addStar(1);
-          showModal('🎉', 'You Sound Wonderful!', `太棒了！你的發音好清楚、好響亮！⭐ 獎勵 1 顆冒險金星！`);
-          speakText(`Brilliant! Beautiful pronunciation!`, 0.9);
-        }, 2200);
+          showModal('🌟', 'Great Effort!', verdict.exact ? '念得好準！⭐ +1 顆冒險金星！' : '聽到你念了！⭐ +1 顆冒險金星！');
+          speakText('Wonderful job!', 0.9);
+        } else if (verdict.option) {
+          const grid = document.getElementById('dialogueOptionsGrid');
+          if (grid && grid.children[verdict.optionIndex]) grid.children[verdict.optionIndex].classList.add('selected');
+          showTobyReply(verdict.option, ++dialogueToken);
+        } else {
+          speakText('Great answer! I love talking with you!', 0.9);
+          playSuccessTune();
+          addStar(1);
+          setMicFeedback(kind, MIC_MSG.tobyGeneric);
+        }
         return;
       }
 
-      if (isListening) return;
+      // 完全沒聽到聲音：不算一次嘗試
+      if (tokens.length === 0 && !session.speech) { setMicFeedback(kind, MIC_MSG.silent); return; }
 
-      try {
-        recognition = new SpeechRecognition();
-        recognition.lang = 'en-US';
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
-
-        isListening = true;
-        btn.classList.add('listening');
-        micLabel.innerText = '請大聲跟著念... 🎙️';
-
-        recognition.onresult = (event) => {
-          const spoken = event.results[0][0].transcript.toLowerCase();
-          isListening = false;
-          btn.classList.remove('listening');
-          micLabel.innerText = '換我說說看 (跟讀)';
-
-          // 幼兒友善判斷：只要有發出聲音或部分匹配即給予極大鼓勵
-          playSuccessTune();
-          addStar(1);
-          showModal('🌟', 'Great Effort!', `聽到你念了！表現太精彩了！⭐ +1 顆冒險金星！`);
-          speakText(`Wonderful job!`, 0.9);
-        };
-
-        recognition.onerror = () => {
-          isListening = false;
-          btn.classList.remove('listening');
-          micLabel.innerText = '換我說說看 (跟讀)';
-          // 幼兒無挫折回饋
-          showModal('💖', 'You Tried Your Best!', `多練習幾次，你會念得越來越厲害！⭐ 鼓勵獎一顆星星！`);
-          addStar(1);
-        };
-
-        recognition.onend = () => {
-          isListening = false;
-          btn.classList.remove('listening');
-          micLabel.innerText = '換我說說看 (跟讀)';
-        };
-
-        recognition.start();
-      } catch (e) {
-        isListening = false;
-        btn.classList.remove('listening');
+      if (micAttempts.key !== key) micAttempts = { key, count: 0 };
+      micAttempts.count++;
+      const missMsg = kind === 'word' ? MIC_MSG.wordMiss : (session.tier === 'word' ? MIC_MSG.tobySentence : MIC_MSG.tobyMiss);
+      if (micAttempts.count < 3) {
+        setMicFeedback(kind, missMsg);
+      } else {
+        micAttempts = { key: '', count: 0 };
+        playSuccessTune();
+        addStar(1);
+        setMicFeedback(kind, MIC_MSG.effort);
       }
+      // 再示範一次（只有未打斷的 session 會走到這裡，micSession 已是 null）
+      if (kind === 'word') speakText(session.target.word, 0.8);
+      else speakTobyLine();
     }
 
     /* =========================================================
@@ -1807,6 +2044,10 @@
        7. 模組三：Toby 夥伴情境對話 (Dialogue)
        ========================================================= */
     function loadDialogue(idx) {
+      ++dialogueToken;
+      stopMic();
+      micAttempts = { key: '', count: 0 };
+      setMicFeedback('toby', '');
       const group = CURRICULUM_DATA[currentAgeIdx];
       currentDialogueIdx = idx % group.dialogues.length;
       const scenario = group.dialogues[currentDialogueIdx];
@@ -1836,36 +2077,33 @@
     }
 
     function selectDialogueOption(opt, btn) {
+      const tok = ++dialogueToken;
       playClickSound();
       btn.classList.add('selected');
 
       // 朗讀孩子的選項
       speakText(opt.text, 0.9, 1.0, () => {
+        if (tok !== dialogueToken) return;
         setTimeout(() => {
-          document.getElementById('tobyLineEn').innerText = `"${opt.reply}"`;
-          document.getElementById('tobyLineZh').innerText = `「${opt.replyZh}」`;
-          speakText(opt.reply, 0.88, 1.1);
-          playSuccessTune();
-          addStar(1);
-
-          setTimeout(() => {
-            loadDialogue(currentDialogueIdx + 1);
-            speakTobyLine();
-          }, 4000);
+          if (tok !== dialogueToken) return;
+          showTobyReply(opt, tok);
         }, 600);
       });
     }
 
-    function startTobyMic() {
-      if (!audioUnlocked) unlockAudioSystem();
-      playClickSound();
-      speakText('I am listening! Say something in English!', 0.9, 1.1, () => {
-        setTimeout(() => {
-          playSuccessTune();
-          addStar(1);
-          showModal('🎉', 'Toby Loves Talking with You!', '太棒了！Toby 聽見了你的聲音，好開心！⭐ 獎勵一顆星星！');
-        }, 1500);
-      });
+    // Toby 的回覆：換字幕、念回覆、給星，4 秒後進下一題（token 失效就不前進）
+    function showTobyReply(opt, tok) {
+      document.getElementById('tobyLineEn').innerText = `"${opt.reply}"`;
+      document.getElementById('tobyLineZh').innerText = `「${opt.replyZh}」`;
+      speakText(opt.reply, 0.88, 1.1);
+      playSuccessTune();
+      addStar(1);
+
+      setTimeout(() => {
+        if (tok !== dialogueToken) return;
+        loadDialogue(currentDialogueIdx + 1);
+        speakTobyLine();
+      }, 4000);
     }
 
     /* =========================================================
