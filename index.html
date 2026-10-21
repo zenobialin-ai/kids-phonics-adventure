@@ -1144,6 +1144,8 @@
         if (typeof onEnd === 'function') setTimeout(onEnd, 0);
         return;
       }
+      let settled = false;     // onEnd 只呼叫一次
+      const finish = () => { if (settled) return; settled = true; if (onEnd) onEnd(); };
       const cleanText = String(text ?? '').replace(/[^a-zA-Z\s]/g, '').trim();
 
       // 優先使用 Web Speech API
@@ -1158,12 +1160,19 @@
           if (preferredVoice) utterance.voice = preferredVoice;
 
           let hasSpoken = false;
-          utterance.onstart = () => { hasSpoken = true; };
-          utterance.onend = () => { if (onEnd) onEnd(); };
+          let ended = false;       // 引擎回報念完（就算沒有 onstart，例如 Safari）就當成功，不再補播
+          let fellBack = false;    // 每次 speakText 最多補播一次線上音訊
+          const fallback = () => { if (fellBack || gen !== speechGen) return; fellBack = true; playFallbackAudio(cleanText, finish); };
+          utterance.onstart = () => {
+            hasSpoken = true;
+            // 已經改播線上音訊後引擎才開口：停掉語音，避免兩個聲音疊在一起
+            if (fellBack && gen === speechGen) { try { window.speechSynthesis.cancel(); } catch (e) {} }
+          };
+          utterance.onend = () => { ended = true; if (!fellBack) finish(); };
           utterance.onerror = (e) => {
             // 我們自己呼叫 cancel() 會讓上一句觸發 interrupted/canceled，這不是失敗，不要補播線上音訊
             if (e && (e.error === 'interrupted' || e.error === 'canceled')) return;
-            playFallbackAudio(cleanText, onEnd);
+            fallback();
           };
 
           window.speechSynthesis.speak(utterance);
@@ -1171,8 +1180,8 @@
           // 防止 file:// 協定下可能暫停的防卡機制
           setTimeout(() => {
             if (gen !== speechGen) return;
-            if (!hasSpoken && window.speechSynthesis.speaking === false) {
-              playFallbackAudio(cleanText, onEnd);
+            if (!hasSpoken && !ended && window.speechSynthesis.speaking === false) {
+              fallback();
             }
           }, 350);
           return;
@@ -1181,7 +1190,7 @@
         }
       }
 
-      playFallbackAudio(cleanText, onEnd);
+      playFallbackAudio(cleanText, finish);
     }
 
     function playFallbackAudio(text, onEnd) {
@@ -2016,7 +2025,8 @@
       el.classList.remove('part-pulse');
       void el.offsetWidth;   // 強制 reflow，連點時動畫才會重播
       el.classList.add('part-pulse');
-      setTimeout(() => el.classList.remove('part-pulse'), 450);
+      clearTimeout(el._pulseTimer);   // 連點時只留最後一個計時器，避免前一次的計時器提早移除動畫
+      el._pulseTimer = setTimeout(() => el.classList.remove('part-pulse'), 450);
     }
 
     function playBlenderPart(type) {
@@ -2025,6 +2035,7 @@
         playPhonemeSound(currentBlenderItem.onset, 0);
         pulseElem('blenderOnsetText');
       } else {
+        playBeep(500, 'sine', 0.15, 0.25);
         // 韻尾（og、un、ig）不是單字，改念同字族的前三個單字
         pulseElem('blenderRimeText');
         const fam = BLENDER_CATALOG[currentBlenderKey];
